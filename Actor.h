@@ -3,6 +3,23 @@
 
 #include "GraphObject.h"
 
-// Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
+class Actor : public GraphObject
+{
+public:
+	Actor(int imageID, double startX, double startY,
+		int startDirection = 0, int depth = 0);
+	virtual bool doSomething() = 0;
+
+private:
+};
+
+class Penelope : public Actor
+{
+public:
+	Penelope(double startX, double startY);
+	virtual bool doSomething();
+
+private:
+};
 
 #endif // ACTOR_H_
