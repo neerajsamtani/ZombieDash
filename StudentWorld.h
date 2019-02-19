@@ -17,10 +17,10 @@ public:
     virtual int move();
     virtual void cleanUp();
 
-	void loadCurrentLevel();
+	bool locationEmpty(int dest_x, int dest_y);
+
 private:
 	Penelope *m_pen;
-	// Wall *m_wall;
 	list<Actor*> actors;
 };
 
