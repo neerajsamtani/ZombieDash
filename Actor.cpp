@@ -5,9 +5,12 @@
 
 ///// ACTOR /////
 
-Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld,
+Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld, bool isSolidObject,
 	int startDirection, int depth)
-	: GraphObject(imageID, startX, startY, startDirection, depth), m_alive(true), m_sWorld(sWorld)
+	: GraphObject(imageID, startX, startY, startDirection, depth), 
+		m_isAlive(true), 
+		m_sWorld(sWorld), 
+		m_isSolidObject(isSolidObject)
 { }
 
 StudentWorld* Actor::getWorld()
@@ -17,38 +20,48 @@ StudentWorld* Actor::getWorld()
 
 bool Actor::isAlive()
 {
-	return m_alive;
+	return m_isAlive;
+}
+void Actor::setIsAlive(bool isAlive)
+{
+	m_isAlive = isAlive;
 }
 
-void Actor::setDead()
+bool Actor::isSolidObject()
 {
-	m_alive = false;
+	return m_isSolidObject;
+}
+void Actor::setIsSolidObject(bool isSolidObject)
+{
+	m_isSolidObject = isSolidObject;
 }
 
 ///// PENELOPE /////
 
 Penelope::Penelope(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_PLAYER, startX, startY, sWorld, right, 0),
+	: Actor(IID_PLAYER, startX, startY, sWorld, SOLID_OBJECT, right, 0),
 	m_landmines(0),
 	m_flamethrowerCharges(0),
 	m_vaccines(0),
 	m_infectionStatus(false),
 	m_infectionCount(0)
 {
+	cout << getWorld()->getLives() << endl;
 }
 
 void Penelope::doSomething()
 {
-	// Check to see if Penelope is alive
+	// Check if Penelope is alive
 	if (!isAlive())
 		return;
-	// Check to see if Penelope is infected
+	// Check if Penelope is infected
 	if (m_infectionStatus)
 		m_infectionCount++;
+	// Check if Penelope is dead
 	if (m_infectionCount >= 500)
 	{
-		setDead();
-		// TODO: The game must play a SOUND_PLAYER_DIE sound effect
+		setIsAlive(false);
+		getWorld()->playSound(SOUND_PLAYER_DIE);
 		return;
 		// TODO: (The StudentWorld object should then detect that she’s dead and the current level ends)
 	}
@@ -70,36 +83,35 @@ void Penelope::doSomething()
 			break;
 		case KEY_PRESS_ENTER:
 			cerr << "ENTER" << endl;
+			cerr << getWorld()->getLives() << endl;
 			// TODO: Vaccine functionality
 			break;
 		// TODO: Object overlap
 		case KEY_PRESS_LEFT:
-			cerr << "LEFT" << endl;
 			setDirection(left);
 			dest_x-= 4;
 			if (getWorld()->locationEmpty(dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_RIGHT:
-			cerr << "RIGHT" << endl;
 			setDirection(right);
 			dest_x += 4;
 			if (getWorld()->locationEmpty(dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_UP:
-			cerr << "UP" << endl;
 			setDirection(up);
 			dest_y += 4;
 			if (getWorld()->locationEmpty(dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_DOWN:
-			cerr << "DOWN" << endl;
 			setDirection(down);
 			dest_y -= 4;
 			if (getWorld()->locationEmpty(dest_x, dest_y))
 				moveTo(dest_x, dest_y);
+			break;
+		default:
 			break;
 		}
 	}
@@ -108,7 +120,7 @@ void Penelope::doSomething()
 ///// WALL /////
 
 Wall::Wall(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_WALL, startX, startY, sWorld, right, 0)
+	: Actor(IID_WALL, startX, startY, sWorld, SOLID_OBJECT, right, 0)
 {
 }
 

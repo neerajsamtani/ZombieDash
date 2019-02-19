@@ -5,10 +5,14 @@
 
 class StudentWorld;
 
+// constants for solid objects
+const bool SOLID_OBJECT		= true;
+const bool NOT_SOLID_OBJECT = false;
+
 class Actor : public GraphObject
 {
 public:
-	Actor(int imageID, double startX, double startY, StudentWorld* sWorld,
+	Actor(int imageID, double startX, double startY, StudentWorld* sWorld, bool isSolidObject,
 		int startDirection = 0, int depth = 0);
 
 	virtual void doSomething() = 0;
@@ -16,9 +20,14 @@ public:
 	StudentWorld* getWorld();
 
 	bool isAlive();
-	void setDead();
+	void setIsAlive(bool isAlive);
+
+	bool isSolidObject();
+	void setIsSolidObject(bool isSolidObject);
+
 private:
-	bool m_alive;
+	bool m_isAlive;
+	bool m_isSolidObject;
 	StudentWorld* m_sWorld;
 };
 

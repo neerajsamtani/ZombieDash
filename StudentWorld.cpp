@@ -15,6 +15,11 @@ StudentWorld::StudentWorld(string assetPath)
 {
 }
 
+StudentWorld::~StudentWorld()
+{
+	cleanUp();
+}
+
 int StudentWorld::init()
 {
 	// LESSON: Only constructors can use intializer lists.
@@ -39,6 +44,14 @@ int StudentWorld::init()
 				switch (ge) // TODO: Add other actors
 				{
 				case Level::empty:
+					break;
+				case Level::citizen:
+					break;
+				case Level::vaccine_goodie:
+					break;
+				case Level::gas_can_goodie:
+					break;
+				case Level::landmine_goodie:
 					break;
 				case Level::smart_zombie:
 					break;
@@ -69,14 +82,14 @@ int StudentWorld::move()
 	m_pen->doSomething();
     // This code is here merely to allow the game to build, run, and terminate after you hit enter.
     // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-    decLives();
 	return GWSTATUS_CONTINUE_GAME;
     // return GWSTATUS_PLAYER_DIED;
 }
 
 void StudentWorld::cleanUp()
 {
-	delete m_pen;
+	if (m_pen != nullptr) // TODO: Is this check necessary?
+		delete m_pen;
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 		delete *p;
@@ -94,28 +107,32 @@ bool StudentWorld::locationEmpty(int dest_x, int dest_y)
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
-
-		// Create bounding box for current actor
-		int actor_x_start = (*p)->getX();
-		int actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
-		int actor_y_start = (*p)->getY();
-		int actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
-
-		// Check if the bouding boxes overlap
-		if ( (actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
-			actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
-			||
-			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
-			actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
-			||
-			(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
-			actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
-			||
-			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
-			actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
-			)
+		// Penelope cannot walk through solid objects
+		if ((*p)->isSolidObject())
 		{
-			return false;
+
+			// Create bounding box for current actor
+			int actor_x_start = (*p)->getX();
+			int actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+			int actor_y_start = (*p)->getY();
+			int actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+
+			// Check if the bouding boxes overlap
+			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+				actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				)
+			{
+				return false;
+			}
 		}
 	}
 	return true;
