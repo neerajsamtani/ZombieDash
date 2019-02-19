@@ -107,6 +107,12 @@ bool StudentWorld::locationEmpty(int dest_x, int dest_y)
 			||
 			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
 			actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+			||
+			(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+			actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+			||
+			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+			actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
 			)
 		{
 			return false;
