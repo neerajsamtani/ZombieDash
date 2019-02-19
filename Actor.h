@@ -5,7 +5,7 @@
 
 class StudentWorld;
 
-// constants for solid objects
+// constants required for these classes
 const bool SOLID_OBJECT		= true;
 const bool NOT_SOLID_OBJECT = false;
 

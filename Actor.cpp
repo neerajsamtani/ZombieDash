@@ -46,7 +46,6 @@ Penelope::Penelope(double startX, double startY, StudentWorld* sWorld)
 	m_infectionStatus(false),
 	m_infectionCount(0)
 {
-	cout << getWorld()->getLives() << endl;
 }
 
 void Penelope::doSomething()
@@ -83,7 +82,7 @@ void Penelope::doSomething()
 			break;
 		case KEY_PRESS_ENTER:
 			cerr << "ENTER" << endl;
-			cerr << getWorld()->getLives() << endl;
+			// cerr << getWorld()->getLives() << endl;
 			// TODO: Vaccine functionality
 			break;
 		// TODO: Object overlap
