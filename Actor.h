@@ -53,4 +53,12 @@ public:
 private:
 };
 
+class Exit : public Actor
+{
+public:
+	Exit(double startX, double startY, StudentWorld* sWorld);
+	virtual void doSomething(); // returns immediately
+private:
+};
+
 #endif // ACTOR_H_

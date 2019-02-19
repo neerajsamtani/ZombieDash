@@ -128,3 +128,23 @@ void Wall::doSomething()
 	return;
 }
 
+///// EXIT /////
+
+Exit::Exit(double startX, double startY, StudentWorld* sWorld)
+	: Actor(IID_EXIT, startX, startY, sWorld, NOT_SOLID_OBJECT, right, 1)
+{
+}
+
+void Exit::doSomething()
+{
+	// TODO: Figure out how to block flames but nothing else
+	// TODO: Determine overlap with person
+	// TODO: check if all citizens have exited
+	if (getWorld()->exitPen(this))
+	{
+		getWorld()->advanceToNextLevel();
+		getWorld()->setLevelFinished();
+		cerr << "EXIT" << endl;
+	}
+	return;
+}

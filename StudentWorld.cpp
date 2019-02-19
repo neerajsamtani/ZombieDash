@@ -1,6 +1,7 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
 #include <string>
+#include <sstream>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -25,7 +26,12 @@ int StudentWorld::init()
 	// LESSON: Only constructors can use intializer lists.
 
 	Level lev(assetPath());
-	string levelFile = "level01.txt"; // TODO: get current level
+	cout << getLevel() << endl;
+
+	ostringstream oss;
+	oss << "level0" << getLevel() << ".txt";
+	string levelFile = oss.str();
+	m_levelFinished = false;
 	Level::LoadResult result = lev.loadLevel(levelFile);
 	if (result == Level::load_fail_file_not_found)
 		cerr << "Cannot find level01.txt data file" << endl;
@@ -61,6 +67,7 @@ int StudentWorld::init()
 					m_pen = new Penelope(x, y, this);
 					break;
 				case Level::exit:
+					actors.push_back(new Exit(x, y, this));
 					break;
 				case Level::wall:
 					actors.push_back(new Wall(x, y, this));
@@ -80,10 +87,15 @@ int StudentWorld::init()
 int StudentWorld::move()
 {
 	m_pen->doSomething();
-    // This code is here merely to allow the game to build, run, and terminate after you hit enter.
-    // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-	return GWSTATUS_CONTINUE_GAME;
-    // return GWSTATUS_PLAYER_DIED;
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+		(*p)->doSomething();
+	if (!(m_pen->isAlive()))
+		return GWSTATUS_PLAYER_DIED;
+	else if (getLevelFinished())
+		return GWSTATUS_FINISHED_LEVEL;
+	else
+		return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()
@@ -136,4 +148,35 @@ bool StudentWorld::locationEmpty(int dest_x, int dest_y)
 		}
 	}
 	return true;
+}
+
+bool StudentWorld::objectOverlap(Actor* A, Actor* B)
+{
+	// TODO: Double check the following note
+	// Note that distance between centers is equal to distance between corners
+	int deltaX = (A->getX()) - (B->getX());
+	int deltaY = (A->getY()) - (B->getY());
+
+	if (((deltaX)*(deltaX)) + ((deltaY)*(deltaY)) <= 100)
+		return true;
+	else
+		return false;
+}
+
+bool StudentWorld::exitPen(Actor* exitPtr)
+{
+	if (objectOverlap(m_pen, exitPtr))
+		return true;
+	else
+		return false;
+}
+
+void StudentWorld::setLevelFinished()
+{
+	m_levelFinished = true;
+}
+
+bool StudentWorld::getLevelFinished()
+{
+	return m_levelFinished;
 }

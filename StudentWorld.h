@@ -17,11 +17,23 @@ public:
     virtual int move();
     virtual void cleanUp();
 
+	// Determines blocking of movement
 	bool locationEmpty(int dest_x, int dest_y);
+
+	// Determines objectOverlap
+	bool objectOverlap(Actor* A, Actor* B);
+
+	// TODO: fix
+	// Determines if any actor can exit
+	bool exitPen(Actor* exitPtr);
+
+	void setLevelFinished();
+	bool getLevelFinished();
 
 private:
 	Penelope *m_pen;
 	list<Actor*> actors;
+	bool m_levelFinished;
 };
 
 #endif // STUDENTWORLD_H_
