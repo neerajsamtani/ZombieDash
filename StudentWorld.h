@@ -23,9 +23,9 @@ public:
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);
 
-	// TODO: fix
 	// Determines if any actor can exit
 	bool exitPen(Actor* exitPtr);
+	// TODO: exitCitizen
 
 	void setLevelFinished();
 	bool getLevelFinished();

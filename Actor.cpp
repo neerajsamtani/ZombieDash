@@ -142,8 +142,9 @@ void Exit::doSomething()
 	// TODO: check if all citizens have exited
 	if (getWorld()->exitPen(this))
 	{
-		getWorld()->advanceToNextLevel();
+		//getWorld()->advanceToNextLevel();
 		getWorld()->setLevelFinished();
+		getWorld()->playSound(SOUND_LEVEL_FINISHED);
 		cerr << "EXIT" << endl;
 	}
 	return;

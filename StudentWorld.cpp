@@ -9,11 +9,10 @@ GameWorld* createStudentWorld(string assetPath)
 	return new StudentWorld(assetPath);
 }
 
-// Students:  Add code to this file, StudentWorld.h, Actor.h and Actor.cpp
-
 StudentWorld::StudentWorld(string assetPath)
 : GameWorld(assetPath)
 {
+	m_pen = nullptr;
 }
 
 StudentWorld::~StudentWorld()
@@ -24,22 +23,22 @@ StudentWorld::~StudentWorld()
 int StudentWorld::init()
 {
 	// LESSON: Only constructors can use intializer lists.
-
+	// TODO: Remove cerr
 	Level lev(assetPath());
-	cout << getLevel() << endl;
-
+	m_levelFinished = false;
 	ostringstream oss;
 	oss << "level0" << getLevel() << ".txt";
 	string levelFile = oss.str();
-	m_levelFinished = false;
+
 	Level::LoadResult result = lev.loadLevel(levelFile);
 	if (result == Level::load_fail_file_not_found)
-		cerr << "Cannot find level01.txt data file" << endl;
+		cerr << "Cannot find " << "level0" << getLevel() << ".txt data file" << endl;
 	else if (result == Level::load_fail_bad_format)
 		cerr << "Your level was improperly formatted" << endl;
 	else if (result == Level::load_success)
 	{
-		cerr << "Successfully loaded level" << endl;
+		cerr << "Successfully loaded " << "level0" << getLevel() << ".txt" << endl;
+		int cnt = 0;
 		for (int level_x = 0; level_x < SPRITE_WIDTH; level_x++)
 		{
 			for (int level_y = 0; level_y < SPRITE_HEIGHT; level_y++)
@@ -64,12 +63,15 @@ int StudentWorld::init()
 				case Level::dumb_zombie:
 					break;
 				case Level::player:
+					cerr << "Creating Penelope" << endl;
 					m_pen = new Penelope(x, y, this);
 					break;
 				case Level::exit:
+					cnt++;
 					actors.push_back(new Exit(x, y, this));
 					break;
 				case Level::wall:
+					cnt++;
 					actors.push_back(new Wall(x, y, this));
 					break;
 				case Level::pit:
@@ -78,14 +80,17 @@ int StudentWorld::init()
 				}
 			}
 		}
-
+		cerr << "Created " << cnt << " actors" << endl;
+		cerr << "Size of list " << actors.size() << endl;
+		return GWSTATUS_CONTINUE_GAME;
 	}
-
-    return GWSTATUS_CONTINUE_GAME;
+	return GWSTATUS_PLAYER_WON;
+	// TODO: FIX DESTRUCTOR
 }
 
 int StudentWorld::move()
 {
+	// TODO: How to win game?
 	m_pen->doSomething();
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
@@ -100,11 +105,28 @@ int StudentWorld::move()
 
 void StudentWorld::cleanUp()
 {
+	// TODO: Remove cerr lines
+	cerr << "Ending Level " << getLevel()-1 << endl;
 	if (m_pen != nullptr) // TODO: Is this check necessary?
+	{
+		cerr << "Deleting Penelope" << endl;
 		delete m_pen;
-	for (list<Actor*>::iterator p = actors.begin();
-		p != actors.end(); p++)
-		delete *p;
+		m_pen = nullptr;
+		// cerr << "Deleted Penelope" << endl;
+	}
+	int cnt = 0;
+	// cerr << "Set count to 0" << endl;
+	list<Actor*>::iterator p = actors.begin();
+	// cerr << "Initialized p" << endl;
+	while (p != actors.end())
+	{
+		cnt++;
+		if (*p != nullptr)
+			delete *p;
+		list<Actor*>::iterator q = actors.erase(p);
+		p = q;
+	}
+	cerr << "Deleted " << cnt << " Actors" << endl;
 }
 
 bool StudentWorld::locationEmpty(int dest_x, int dest_y)
