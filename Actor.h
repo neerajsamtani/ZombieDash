@@ -66,15 +66,30 @@ private:
 };
 
 
-class DumbZombie : public Actor
+class Zombie : public Actor
 {
 public:
-	DumbZombie(double startX, double startY, StudentWorld* sWorld);
-	virtual void doSomething();
+	Zombie(double startX, double startY, StudentWorld* sWorld);
+	virtual void doSomething() = 0;
+
+	int  getCurrentTick();
+	void nextTick();
+
+	int  getMovementPlanDistance();
+	void setMovementPlanDistance(int x);
+	void decMovementPlanDistance();
 
 private:
 	int m_movementPlanDistance;
 	int m_currentTick;
+};
+
+class DumbZombie : public Zombie
+{
+public:
+	DumbZombie(double startX, double startY, StudentWorld* sWorld);
+	virtual void doSomething();
+private:
 };
 
 

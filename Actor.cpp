@@ -150,31 +150,61 @@ void Exit::doSomething()
 	return;
 }
 
+
+///// ZOMBIE /////
+
+Zombie::Zombie(double startX, double startY, StudentWorld* sWorld)
+	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, right, 0),
+	m_movementPlanDistance(0), m_currentTick(0)
+{
+}
+
+int Zombie::getCurrentTick()
+{
+	return m_currentTick;
+}
+void Zombie::nextTick()
+{
+	m_currentTick++;
+}
+
+int  Zombie::getMovementPlanDistance()
+{
+	return m_movementPlanDistance;
+}
+void Zombie::setMovementPlanDistance(int x)
+{
+	m_movementPlanDistance = x;
+}
+void Zombie::decMovementPlanDistance()
+{
+	m_movementPlanDistance--;
+}
+
+
 ///// DUMB ZOMBIE /////
-// DUMB ZOMBIE RN
 // TODO: Smart Zombie
 
 DumbZombie::DumbZombie(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, right, 0),
-	m_movementPlanDistance(0), m_currentTick(0)
+	: Zombie(startX, startY, sWorld)
 {
 }
 
 void DumbZombie::doSomething()
 {
 	// Increase tick counter
-	m_currentTick++;
+	nextTick();
 	// Check if Zombie is alive
 	if (!isAlive())
 		return;
 	// Check if Zombie is paralized
-	if (m_currentTick % 2 == 0)
+	if (getCurrentTick() % 2 == 0)
 		return;
 	// TODO: Implement Vomit function
 	// Check if the zombie needs a new movement plan
-	if (m_movementPlanDistance == 0)
+	if (getMovementPlanDistance() == 0)
 	{
-		m_movementPlanDistance = randInt(3, 10);
+		setMovementPlanDistance(randInt(3, 10));
 		int DIRS[] = { up, down, left, right };
 		setDirection(DIRS[randInt(0, 3)]);
 	}
@@ -200,9 +230,8 @@ void DumbZombie::doSomething()
 	if (getWorld()->locationEmpty(this, dest_x, dest_y))
 	{
 		moveTo(dest_x, dest_y);
-		m_movementPlanDistance--;
+		decMovementPlanDistance();
 	}
 	else
-		m_movementPlanDistance = 0;
-
+		setMovementPlanDistance(0);
 }

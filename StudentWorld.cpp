@@ -139,13 +139,40 @@ bool StudentWorld::locationEmpty(Actor* curActor, int dest_x, int dest_y)
 	int dest_y_start = dest_y;
 	int dest_y_end = (dest_y + SPRITE_HEIGHT - 1);
 
-	// Check if the destination x and y coordinates are in any actor's bounding box
+	// Check if the destination x and y coordinates are in Penelope's bounding box
+	if (curActor != m_pen)
+	{
+		// Create bounding box for current actor
+		int pen_x_start = m_pen->getX();
+		int pen_x_end = (m_pen->getX() + SPRITE_WIDTH - 1);
+		int pen_y_start = m_pen->getY();
+		int pen_y_end = (m_pen->getY() + SPRITE_HEIGHT - 1);
+
+		// Check if the bouding boxes overlap
+		if ((pen_x_start <= dest_x_start && dest_x_start <= pen_x_end &&
+			pen_y_start <= dest_y_start && dest_y_start <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_end && dest_x_end <= pen_x_end &&
+				pen_y_start <= dest_y_end && dest_y_end <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_start && dest_x_start <= pen_x_end &&
+				pen_y_start <= dest_y_end && dest_y_end <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_end && dest_x_end <= pen_x_end &&
+				pen_y_start <= dest_y_start && dest_y_start <= pen_y_end)
+			)
+		{
+			return false;
+		}
+	}
+
+	// Check if the destination x and y coordinates are in any other actor's bounding box
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
 		if (*p == curActor)
 			continue;
-		// Penelope cannot walk through solid objects
+		// Actors cannot walk through solid objects
 		if ((*p)->isSolidObject())
 		{
 
