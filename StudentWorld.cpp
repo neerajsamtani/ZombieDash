@@ -15,6 +15,7 @@ StudentWorld::StudentWorld(string assetPath)
 	m_pen = nullptr;
 }
 
+// TODO: Winning the game destructs twice
 StudentWorld::~StudentWorld()
 {
 	cleanUp();
@@ -59,6 +60,8 @@ int StudentWorld::init()
 				case Level::landmine_goodie:
 					break;
 				case Level::smart_zombie:
+					cnt++;
+					actors.push_back(new SmartZombie(x, y, this));
 					break;
 				case Level::dumb_zombie:
 					cnt++;
@@ -203,14 +206,46 @@ bool StudentWorld::locationEmpty(Actor* curActor, int dest_x, int dest_y)
 	return true;
 }
 
-bool StudentWorld::objectOverlap(Actor* A, Actor* B)
+int euclidianDistance(Actor* A, Actor* B)
 {
 	// TODO: Double check the following note
 	// Note that distance between centers is equal to distance between corners
 	int deltaX = (A->getX()) - (B->getX());
 	int deltaY = (A->getY()) - (B->getY());
 
-	if (((deltaX)*(deltaX)) + ((deltaY)*(deltaY)) <= 100)
+	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
+}
+
+// TODO FIRST: FIX THIS. Figure out how to return up / down / left / right
+int StudentWorld::dirOfClosestPerson(Actor* curActor)
+{
+	/*
+	// Check distance to Penelope
+	int minDistance = euclidianDistance(curActor, m_pen);
+	Actor* closestActor = m_pen;
+	// Check distance to other actors
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		// TODO: Check if character can be infected
+		//if (!(*p)->canInfect())
+		//	continue;
+		int distance = euclidianDistance(curActor, *p);
+		if ( distance < minDistance)
+		{
+			minDistance = distance;
+			closestActor = *p;
+		}
+	}
+	if (euclidianDistance(curActor, closestActor) <= (80 * 80))
+		int direction = DIRS[randInt(0, 3)];
+		*/
+	return 90;
+}
+
+bool StudentWorld::objectOverlap(Actor* A, Actor* B)
+{
+	if (euclidianDistance(A, B) <= 100)
 		return true;
 	else
 		return false;

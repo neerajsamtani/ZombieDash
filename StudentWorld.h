@@ -30,6 +30,8 @@ public:
 	void setLevelFinished();
 	bool getLevelFinished();
 
+	int dirOfClosestPerson(Actor* curActor);
+
 private:
 	Penelope *m_pen;
 	list<Actor*> actors;

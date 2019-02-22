@@ -70,7 +70,11 @@ class Zombie : public Actor
 {
 public:
 	Zombie(double startX, double startY, StudentWorld* sWorld);
-	virtual void doSomething() = 0;
+	virtual void doSomething();
+
+	bool startDoSomething();
+	virtual void decideMovementPlan() = 0;
+	void move();
 
 	int  getCurrentTick();
 	void nextTick();
@@ -88,7 +92,16 @@ class DumbZombie : public Zombie
 {
 public:
 	DumbZombie(double startX, double startY, StudentWorld* sWorld);
-	virtual void doSomething();
+	virtual void decideMovementPlan();
+
+private:
+};
+
+class SmartZombie : public Zombie
+{
+public:
+	SmartZombie(double startX, double startY, StudentWorld* sWorld);
+	virtual void decideMovementPlan();
 private:
 };
 

@@ -157,6 +157,7 @@ Zombie::Zombie(double startX, double startY, StudentWorld* sWorld)
 	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, right, 0),
 	m_movementPlanDistance(0), m_currentTick(0)
 {
+	// TODO: Other Circumstances
 }
 
 int Zombie::getCurrentTick()
@@ -181,33 +182,21 @@ void Zombie::decMovementPlanDistance()
 	m_movementPlanDistance--;
 }
 
-
-///// DUMB ZOMBIE /////
-// TODO: Smart Zombie
-
-DumbZombie::DumbZombie(double startX, double startY, StudentWorld* sWorld)
-	: Zombie(startX, startY, sWorld)
-{
-}
-
-void DumbZombie::doSomething()
+bool Zombie::startDoSomething()
 {
 	// Increase tick counter
 	nextTick();
 	// Check if Zombie is alive
 	if (!isAlive())
-		return;
+		return false;
 	// Check if Zombie is paralized
 	if (getCurrentTick() % 2 == 0)
-		return;
+		return false;
 	// TODO: Implement Vomit function
-	// Check if the zombie needs a new movement plan
-	if (getMovementPlanDistance() == 0)
-	{
-		setMovementPlanDistance(randInt(3, 10));
-		int DIRS[] = { up, down, left, right };
-		setDirection(DIRS[randInt(0, 3)]);
-	}
+	return true;
+}
+void Zombie::move()
+{
 	// Attempt to move zombie in a certain direction
 	int dest_x = getX();
 	int dest_y = getY();
@@ -234,4 +223,50 @@ void DumbZombie::doSomething()
 	}
 	else
 		setMovementPlanDistance(0);
+}
+
+void Zombie::doSomething()
+{
+	if (!startDoSomething())
+		return;
+	// Check if the zombie needs a new movement plan
+	decideMovementPlan();
+	move();
+}
+
+
+///// DUMB ZOMBIE /////
+
+DumbZombie::DumbZombie(double startX, double startY, StudentWorld* sWorld)
+	: Zombie(startX, startY, sWorld)
+{
+}
+
+void DumbZombie::decideMovementPlan()
+{
+	// Check if the zombie needs a new movement plan
+	if (getMovementPlanDistance() == 0)
+	{
+		setMovementPlanDistance(randInt(3, 10));
+		int DIRS[] = { up, down, left, right };
+		setDirection(DIRS[randInt(0, 3)]);
+	}
+}
+
+///// SMART ZOMBIE /////
+
+SmartZombie::SmartZombie(double startX, double startY, StudentWorld* sWorld)
+	: Zombie(startX, startY, sWorld)
+{
+}
+
+void SmartZombie::decideMovementPlan()
+{
+	// Check if the zombie needs a new movement plan
+	if (getMovementPlanDistance() == 0)
+	{
+		setMovementPlanDistance(randInt(3, 10));
+		int direction = getWorld()->dirOfClosestPerson(this);
+		setDirection(direction);
+	}
 }
