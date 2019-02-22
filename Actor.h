@@ -2,6 +2,7 @@
 #define ACTOR_H_
 
 #include "GraphObject.h"
+#include "GameConstants.h"
 
 class StudentWorld;
 
@@ -31,6 +32,7 @@ private:
 	StudentWorld* m_sWorld;
 };
 
+
 class Penelope : public Actor
 {
 public:
@@ -45,6 +47,7 @@ private:
 	int m_infectionCount;
 };
 
+
 class Wall : public Actor
 {
 public:
@@ -53,6 +56,7 @@ public:
 private:
 };
 
+
 class Exit : public Actor
 {
 public:
@@ -60,5 +64,18 @@ public:
 	virtual void doSomething(); // returns immediately
 private:
 };
+
+
+class DumbZombie : public Actor
+{
+public:
+	DumbZombie(double startX, double startY, StudentWorld* sWorld);
+	virtual void doSomething();
+
+private:
+	int m_movementPlanDistance;
+	int m_currentTick;
+};
+
 
 #endif // ACTOR_H_

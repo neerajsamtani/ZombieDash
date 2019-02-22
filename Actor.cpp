@@ -89,25 +89,25 @@ void Penelope::doSomething()
 		case KEY_PRESS_LEFT:
 			setDirection(left);
 			dest_x-= 4;
-			if (getWorld()->locationEmpty(dest_x, dest_y))
+			if (getWorld()->locationEmpty(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
 			dest_x += 4;
-			if (getWorld()->locationEmpty(dest_x, dest_y))
+			if (getWorld()->locationEmpty(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_UP:
 			setDirection(up);
 			dest_y += 4;
-			if (getWorld()->locationEmpty(dest_x, dest_y))
+			if (getWorld()->locationEmpty(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_DOWN:
 			setDirection(down);
 			dest_y -= 4;
-			if (getWorld()->locationEmpty(dest_x, dest_y))
+			if (getWorld()->locationEmpty(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		default:
@@ -148,4 +148,61 @@ void Exit::doSomething()
 		cerr << "EXIT" << endl;
 	}
 	return;
+}
+
+///// DUMB ZOMBIE /////
+// DUMB ZOMBIE RN
+// TODO: Smart Zombie
+
+DumbZombie::DumbZombie(double startX, double startY, StudentWorld* sWorld)
+	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, right, 0),
+	m_movementPlanDistance(0), m_currentTick(0)
+{
+}
+
+void DumbZombie::doSomething()
+{
+	// Increase tick counter
+	m_currentTick++;
+	// Check if Zombie is alive
+	if (!isAlive())
+		return;
+	// Check if Zombie is paralized
+	if (m_currentTick % 2 == 0)
+		return;
+	// TODO: Implement Vomit function
+	// Check if the zombie needs a new movement plan
+	if (m_movementPlanDistance == 0)
+	{
+		m_movementPlanDistance = randInt(3, 10);
+		int DIRS[] = { up, down, left, right };
+		setDirection(DIRS[randInt(0, 3)]);
+	}
+	// Attempt to move zombie in a certain direction
+	int dest_x = getX();
+	int dest_y = getY();
+	switch (getDirection())
+	{
+		// TODO: Check if one pixel is one in this code
+	case left:
+		dest_x -= 1;
+		break;
+	case right:
+		dest_x += 1;
+		break;
+	case up:
+		dest_y += 1;
+		break;
+	case down:
+		dest_y -= 1;
+		break;
+	}
+	if (getWorld()->locationEmpty(this, dest_x, dest_y))
+	{
+		moveTo(dest_x, dest_y);
+		m_movementPlanDistance--;
+	}
+	else
+		m_movementPlanDistance = 0;
+
 }

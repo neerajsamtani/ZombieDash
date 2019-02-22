@@ -18,7 +18,7 @@ public:
     virtual void cleanUp();
 
 	// Determines blocking of movement
-	bool locationEmpty(int dest_x, int dest_y);
+	bool locationEmpty(Actor* curActor, int dest_x, int dest_y);
 
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);

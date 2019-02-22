@@ -61,6 +61,8 @@ int StudentWorld::init()
 				case Level::smart_zombie:
 					break;
 				case Level::dumb_zombie:
+					cnt++;
+					actors.push_back(new DumbZombie(x, y, this));
 					break;
 				case Level::player:
 					cerr << "Creating Penelope" << endl;
@@ -129,7 +131,7 @@ void StudentWorld::cleanUp()
 	cerr << "Deleted " << cnt << " Actors" << endl;
 }
 
-bool StudentWorld::locationEmpty(int dest_x, int dest_y)
+bool StudentWorld::locationEmpty(Actor* curActor, int dest_x, int dest_y)
 {
 	// Create bounding box for destination
 	int dest_x_start = dest_x;
@@ -141,6 +143,8 @@ bool StudentWorld::locationEmpty(int dest_x, int dest_y)
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
+		if (*p == curActor)
+			continue;
 		// Penelope cannot walk through solid objects
 		if ((*p)->isSolidObject())
 		{
