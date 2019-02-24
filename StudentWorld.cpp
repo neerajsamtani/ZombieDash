@@ -217,16 +217,24 @@ int euclidianDistance(Actor* A, Actor* B)
 }
 
 // TODO FIRST: FIX THIS. Figure out how to return up / down / left / right
-int StudentWorld::dirOfClosestPerson(Actor* curActor)
+void StudentWorld::dirOfClosestPerson(Actor* curActor)
 {
-	/*
+	const int right = curActor->right;
+	const int left = curActor->left;
+	const int up = curActor->up;
+	const int down = curActor->down;
+	const int DIRS[] = { right, left, up, down };
 	// Check distance to Penelope
 	int minDistance = euclidianDistance(curActor, m_pen);
 	Actor* closestActor = m_pen;
 	// Check distance to other actors
+	/*
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
+		// Ensure that the zombie doesn't pick itself
+		if (*p == curActor)
+			continue;
 		// TODO: Check if character can be infected
 		//if (!(*p)->canInfect())
 		//	continue;
@@ -237,10 +245,54 @@ int StudentWorld::dirOfClosestPerson(Actor* curActor)
 			closestActor = *p;
 		}
 	}
-	if (euclidianDistance(curActor, closestActor) <= (80 * 80))
-		int direction = DIRS[randInt(0, 3)];
-		*/
-	return 90;
+	*/
+	if (euclidianDistance(curActor, closestActor) > (80 * 80))
+		curActor->setDirection(DIRS[randInt(0, 3)]);
+	else
+	{
+		if (closestActor->getX() == curActor->getX())
+		{
+			if (closestActor->getY() > curActor->getY())
+			{
+				curActor->setDirection(up);
+			}
+			else
+				curActor->setDirection(down);
+		}
+		else if (closestActor->getY() == curActor->getY())
+		{
+			if (closestActor->getX() > curActor->getX())
+			{
+				curActor->setDirection(right);
+			}
+			else
+				curActor->setDirection(left);
+		}
+		else
+		{
+			// TODO: Modify algorithm?
+			// Set possible directions
+			int possibleDirs[2];
+			if (closestActor->getX() > curActor->getX())
+			{
+				possibleDirs[0] = right;
+				if (closestActor->getY() > curActor->getY())
+					possibleDirs[1] = up;
+				else
+					possibleDirs[1] = down;
+			}
+			else
+			{
+				possibleDirs[0] = left;
+				if (closestActor->getY() > curActor->getY())
+					possibleDirs[1] = up;
+				else
+					possibleDirs[1] = down;
+			}
+			curActor->setDirection(possibleDirs[randInt(0, 1)]);
+		}
+
+	}
 }
 
 bool StudentWorld::objectOverlap(Actor* A, Actor* B)

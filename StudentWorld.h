@@ -30,7 +30,7 @@ public:
 	void setLevelFinished();
 	bool getLevelFinished();
 
-	int dirOfClosestPerson(Actor* curActor);
+	void dirOfClosestPerson(Actor* curActor);
 
 private:
 	Penelope *m_pen;

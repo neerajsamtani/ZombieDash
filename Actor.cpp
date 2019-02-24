@@ -266,7 +266,6 @@ void SmartZombie::decideMovementPlan()
 	if (getMovementPlanDistance() == 0)
 	{
 		setMovementPlanDistance(randInt(3, 10));
-		int direction = getWorld()->dirOfClosestPerson(this);
-		setDirection(direction);
+		getWorld()->dirOfClosestPerson(this);
 	}
 }
