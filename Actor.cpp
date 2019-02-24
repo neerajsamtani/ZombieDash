@@ -5,12 +5,14 @@
 
 ///// ACTOR /////
 
-Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld, bool isSolidObject,
-	int startDirection, int depth)
+Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld,
+	bool isSolidObject = NOT_SOLID_OBJECT, bool canInfect = CANNOT_INFECT,
+	int startDirection = 0, int depth = 0)
 	: GraphObject(imageID, startX, startY, startDirection, depth), 
 		m_isAlive(true), 
 		m_sWorld(sWorld), 
-		m_isSolidObject(isSolidObject)
+		m_isSolidObject(isSolidObject),
+		m_canInfect(canInfect)
 { }
 
 StudentWorld* Actor::getWorld()
@@ -36,10 +38,15 @@ void Actor::setIsSolidObject(bool isSolidObject)
 	m_isSolidObject = isSolidObject;
 }
 
+bool Actor::canInfect()
+{
+	return m_canInfect;
+}
+
 ///// PENELOPE /////
 
 Penelope::Penelope(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_PLAYER, startX, startY, sWorld, SOLID_OBJECT, right, 0),
+	: Actor(IID_PLAYER, startX, startY, sWorld, SOLID_OBJECT, CAN_INFECT, right, 0),
 	m_landmines(0),
 	m_flamethrowerCharges(0),
 	m_vaccines(0),
@@ -119,7 +126,7 @@ void Penelope::doSomething()
 ///// WALL /////
 
 Wall::Wall(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_WALL, startX, startY, sWorld, SOLID_OBJECT, right, 0)
+	: Actor(IID_WALL, startX, startY, sWorld, SOLID_OBJECT, CANNOT_INFECT, right, 0)
 {
 }
 
@@ -131,7 +138,7 @@ void Wall::doSomething()
 ///// EXIT /////
 
 Exit::Exit(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_EXIT, startX, startY, sWorld, NOT_SOLID_OBJECT, right, 1)
+	: Actor(IID_EXIT, startX, startY, sWorld, NOT_SOLID_OBJECT, CANNOT_INFECT, right, 1)
 {
 }
 
@@ -154,7 +161,7 @@ void Exit::doSomething()
 ///// ZOMBIE /////
 
 Zombie::Zombie(double startX, double startY, StudentWorld* sWorld)
-	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, right, 0),
+	: Actor(IID_ZOMBIE, startX, startY, sWorld, SOLID_OBJECT, CANNOT_INFECT, right, 0),
 	m_movementPlanDistance(0), m_currentTick(0)
 {
 	// TODO: Other Circumstances
@@ -266,6 +273,7 @@ void SmartZombie::decideMovementPlan()
 	if (getMovementPlanDistance() == 0)
 	{
 		setMovementPlanDistance(randInt(3, 10));
-		getWorld()->dirOfClosestPerson(this);
+		int direction = getWorld()->dirOfClosestPerson(this);
+		setDirection(direction);
 	}
 }

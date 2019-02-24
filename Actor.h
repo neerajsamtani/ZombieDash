@@ -10,11 +10,15 @@ class StudentWorld;
 const bool SOLID_OBJECT		= true;
 const bool NOT_SOLID_OBJECT = false;
 
+const bool CAN_INFECT = true;
+const bool CANNOT_INFECT = false;
+
 class Actor : public GraphObject
 {
 public:
-	Actor(int imageID, double startX, double startY, StudentWorld* sWorld, bool isSolidObject,
-		int startDirection = 0, int depth = 0);
+	Actor(int imageID, double startX, double startY, StudentWorld* sWorld, 
+		bool m_isSolidObject, bool m_canInfect,
+		int startDirection, int depth);
 
 	virtual void doSomething() = 0;
 
@@ -26,9 +30,12 @@ public:
 	bool isSolidObject();
 	void setIsSolidObject(bool isSolidObject);
 
+	bool canInfect();
+
 private:
 	bool m_isAlive;
 	bool m_isSolidObject;
+	bool m_canInfect;
 	StudentWorld* m_sWorld;
 };
 

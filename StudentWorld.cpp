@@ -216,61 +216,65 @@ int euclidianDistance(Actor* A, Actor* B)
 	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
 }
 
-// TODO FIRST: FIX THIS. Figure out how to return up / down / left / right
-void StudentWorld::dirOfClosestPerson(Actor* curActor)
+int StudentWorld::dirOfClosestPerson(Actor* curActor)
 {
 	const int right = curActor->right;
 	const int left = curActor->left;
 	const int up = curActor->up;
 	const int down = curActor->down;
 	const int DIRS[] = { right, left, up, down };
-	// Check distance to Penelope
+	// Select closest person
+	// Assume Penelope is the closest
 	int minDistance = euclidianDistance(curActor, m_pen);
 	Actor* closestActor = m_pen;
-	// Check distance to other actors
-	/*
+	// Check if other actors are closer
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
-		// Ensure that the zombie doesn't pick itself
-		if (*p == curActor)
-			continue;
-		// TODO: Check if character can be infected
-		//if (!(*p)->canInfect())
-		//	continue;
-		int distance = euclidianDistance(curActor, *p);
-		if ( distance < minDistance)
+		// Ensure that the zombie doesn't pick itself 
+		// and check if the character can be infected
+		if (*p != curActor && (*p)->canInfect())
 		{
-			minDistance = distance;
-			closestActor = *p;
+			int distance = euclidianDistance(curActor, *p);
+			if (distance < minDistance)
+			{
+				minDistance = distance;
+				closestActor = *p;
+			}
 		}
 	}
-	*/
+	// If the distance to the selected nearest person is more than 80 pixels
+	// away, the direction is chosen from up, down, left, and right.
 	if (euclidianDistance(curActor, closestActor) > (80 * 80))
-		curActor->setDirection(DIRS[randInt(0, 3)]);
+		return (DIRS[randInt(0, 3)]);
+	// Otherwise, the direction is chosen to be one that would cause the
+	// zombie to get closer to the person
 	else
 	{
+		// If the zombie is on the same row or column as the person,
+		// choose the(only) direction that gets the zombie closer
 		if (closestActor->getX() == curActor->getX())
 		{
 			if (closestActor->getY() > curActor->getY())
 			{
-				curActor->setDirection(up);
+				return (up);
 			}
 			else
-				curActor->setDirection(down);
+				return (down);
 		}
 		else if (closestActor->getY() == curActor->getY())
 		{
 			if (closestActor->getX() > curActor->getX())
 			{
-				curActor->setDirection(right);
+				return (right);
 			}
 			else
-				curActor->setDirection(left);
+				return (left);
 		}
 		else
+		// Otherwise, choose randomly between the two directions
+		// (one horizontal and one vertical) that get the zombie closer
 		{
-			// TODO: Modify algorithm?
 			// Set possible directions
 			int possibleDirs[2];
 			if (closestActor->getX() > curActor->getX())
@@ -289,7 +293,7 @@ void StudentWorld::dirOfClosestPerson(Actor* curActor)
 				else
 					possibleDirs[1] = down;
 			}
-			curActor->setDirection(possibleDirs[randInt(0, 1)]);
+			return (possibleDirs[randInt(0, 1)]);
 		}
 
 	}
