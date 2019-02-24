@@ -47,7 +47,7 @@ int StudentWorld::init()
 				Level::MazeEntry ge = lev.getContentsOf(level_x, level_y);
 				int x = level_x * SPRITE_WIDTH;
 				int y = level_y * SPRITE_HEIGHT;
-				switch (ge) // TODO: Add other actors
+				switch (ge)
 				{
 				case Level::empty:
 					break;
@@ -81,7 +81,6 @@ int StudentWorld::init()
 					break;
 				case Level::pit:
 					break;
-					// TODO: etc…
 				}
 			}
 		}
@@ -90,7 +89,6 @@ int StudentWorld::init()
 		return GWSTATUS_CONTINUE_GAME;
 	}
 	return GWSTATUS_PLAYER_WON;
-	// TODO: FIX DESTRUCTOR
 }
 
 int StudentWorld::move()

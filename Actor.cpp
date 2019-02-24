@@ -1,8 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
 
-// Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
-
 ///// ACTOR /////
 
 Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld,
@@ -149,7 +147,6 @@ void Exit::doSomething()
 	// TODO: check if all citizens have exited
 	if (getWorld()->exitPen(this))
 	{
-		//getWorld()->advanceToNextLevel();
 		getWorld()->setLevelFinished();
 		getWorld()->playSound(SOUND_LEVEL_FINISHED);
 		cerr << "EXIT" << endl;
@@ -238,6 +235,7 @@ void Zombie::doSomething()
 		return;
 	// Check if the zombie needs a new movement plan
 	decideMovementPlan();
+	// move
 	move();
 }
 
