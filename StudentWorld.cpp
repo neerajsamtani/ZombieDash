@@ -61,23 +61,23 @@ int StudentWorld::init()
 					break;
 				case Level::smart_zombie:
 					cnt++;
-					actors.push_back(new SmartZombie(x, y, this));
+					addActor(new SmartZombie(this, x, y));
 					break;
 				case Level::dumb_zombie:
 					cnt++;
-					actors.push_back(new DumbZombie(x, y, this));
+					addActor(new DumbZombie(this, x, y));
 					break;
 				case Level::player:
 					cerr << "Creating Penelope" << endl;
-					m_pen = new Penelope(x, y, this);
+					m_pen = new Penelope(this, x, y);
 					break;
 				case Level::exit:
 					cnt++;
-					actors.push_back(new Exit(x, y, this));
+					addActor(new Exit(this, x, y));
 					break;
 				case Level::wall:
 					cnt++;
-					actors.push_back(new Wall(x, y, this));
+					addActor(new Wall(this, x, y));
 					break;
 				case Level::pit:
 					break;
@@ -91,6 +91,11 @@ int StudentWorld::init()
 	return GWSTATUS_PLAYER_WON;
 }
 
+void StudentWorld::addActor(Actor * a)
+{
+	actors.push_back(a);
+}
+
 int StudentWorld::move()
 {
 	// TODO: How to win game?
@@ -98,7 +103,7 @@ int StudentWorld::move()
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 		(*p)->doSomething();
-	if (!(m_pen->isAlive()))
+	if (m_pen->isDead())
 		return GWSTATUS_PLAYER_DIED;
 	else if (getLevelFinished())
 		return GWSTATUS_FINISHED_LEVEL;
@@ -132,7 +137,7 @@ void StudentWorld::cleanUp()
 	cerr << "Deleted " << cnt << " Actors" << endl;
 }
 
-bool StudentWorld::locationEmpty(Actor* curActor, int dest_x, int dest_y)
+bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double dest_x, double dest_y)
 {
 	// Create bounding box for destination
 	int dest_x_start = dest_x;
@@ -174,7 +179,7 @@ bool StudentWorld::locationEmpty(Actor* curActor, int dest_x, int dest_y)
 		if (*p == curActor)
 			continue;
 		// Actors cannot walk through solid objects
-		if ((*p)->isSolidObject())
+		if ((*p)->blocksMovement())
 		{
 
 			// Create bounding box for current actor
@@ -231,7 +236,7 @@ int StudentWorld::dirOfClosestPerson(Actor* curActor)
 	{
 		// Ensure that the zombie doesn't pick itself 
 		// and check if the character can be infected
-		if (*p != curActor && (*p)->canInfect())
+		if (*p != curActor && (*p)->triggersZombieVomit())
 		{
 			int distance = euclidianDistance(curActor, *p);
 			if (distance < minDistance)
