@@ -28,7 +28,7 @@ public:
 
 	// If this is an activated object, perform its effect on a (e.g., for an
 	// Exit have a use the exit).
-	//virtual void activateIfAppropriate(Actor* a);
+	virtual void activateIfAppropriate(Actor* a);
 
 	// If this object uses exits, use the exit.
 	virtual void useExitIfAppropriate();
@@ -49,7 +49,7 @@ public:
 	virtual bool blocksFlame() const;
 
 	// Does this object trigger landmines only when they're active?
-	//virtual bool triggersOnlyActiveLandmines() const;
+	virtual bool triggersOnlyActiveLandmines() const;
 
 	// Can this object cause a zombie to vomit?
 	virtual bool triggersZombieVomit() const;
@@ -66,32 +66,101 @@ private:
 	StudentWorld* m_sWorld;
 };
 
-/*
-class Actor : public GraphObject
+class Wall : public Actor
 {
 public:
-	Actor(int imageID, double startX, double startY, StudentWorld* sWorld, 
-		bool m_isSolidObject, bool m_canInfect,
-		int startDirection, int depth);
-
-	virtual void doSomething() = 0;
-
-	StudentWorld* getWorld();
-
-	bool isDead();
-	void setIsAlive(bool isAlive);
-
-	bool isSolidObject();
-	void setIsSolidObject(bool isSolidObject);
-
-	bool canInfect();
-
-private:
-	bool m_isAlive;
-	bool m_isSolidObject;
-	bool m_canInfect;
-	
+	Wall(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual bool blocksMovement() const;
+	virtual bool blocksFlame() const;
 };
+
+class ActivatingObject : public Actor
+{
+public:
+	ActivatingObject(StudentWorld* w, int imageID, double x, double y, int depth, int dir);
+};
+
+class Exit : public ActivatingObject
+{
+public:
+	Exit(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+
+	virtual void activateIfAppropriate(Actor* a);
+	virtual bool blocksFlame() const;
+};
+
+/*
+
+class Pit : public ActivatingObject
+{
+public:
+	Pit(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void activateIfAppropriate(Actor* a);
+};
+
+class Flame : public ActivatingObject
+{
+public:
+	Flame(StudentWorld* w, double x, double y, int dir);
+	virtual void doSomething();
+	virtual void activateIfAppropriate(Actor* a);
+};
+
+class Vomit : public ActivatingObject
+{
+public:
+	Vomit(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void activateIfAppropriate(Actor* a);
+};
+
+class Landmine : public ActivatingObject
+{
+public:
+	Landmine(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void activateIfAppropriate(Actor* a);
+	virtual void dieByFallOrBurnIfAppropriate();
+};
+
+class Goodie : public ActivatingObject
+{
+public:
+	Goodie(StudentWorld* w, int imageID, double x, double y);
+	virtual void activateIfAppropriate(Actor* a);
+	virtual void dieByFallOrBurnIfAppropriate();
+
+	  // Have p pick up this goodie.
+	virtual void pickUp(Penelope* p) = 0;
+};
+
+class VaccineGoodie : public Goodie
+{
+public:
+	VaccineGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
+class GasCanGoodie : public Goodie
+{
+public:
+	GasCanGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
+class LandmineGoodie : public Goodie
+{
+public:
+	LandmineGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
 */
 
 class Agent : public Actor
@@ -205,32 +274,5 @@ public:
 private:
 	void decideMovementPlan();
 };
-
-
-class Wall : public Actor
-{
-public:
-	Wall(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-	virtual bool blocksMovement() const;
-	virtual bool blocksFlame() const;
-};
-
-class ActivatingObject : public Actor
-{
-public:
-	ActivatingObject(StudentWorld* w, int imageID, double x, double y, int depth, int dir);
-};
-
-class Exit : public ActivatingObject
-{
-public:
-	Exit(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-
-	virtual void activateIfAppropriate(Actor* a);
-	virtual bool blocksFlame() const;
-};
-
 
 #endif // ACTOR_H_

@@ -52,6 +52,8 @@ int StudentWorld::init()
 				case Level::empty:
 					break;
 				case Level::citizen:
+					cnt++;
+					addActor(new Citizen(this, x, y));
 					break;
 				case Level::vaccine_goodie:
 					break;
@@ -209,6 +211,22 @@ bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double dest_x, doub
 	return true;
 }
 
+void StudentWorld::activateOnAppropriateActors(Actor* a)
+{
+	if (objectOverlap(m_pen, a))
+	{
+		a->activateIfAppropriate(m_pen);
+	}
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		if (objectOverlap(*p, a))
+		{
+			a->activateIfAppropriate(*p);
+		}
+	}
+}
+
 int euclidianDistance(Actor* A, Actor* B)
 {
 	// TODO: Double check the following note
@@ -305,14 +323,6 @@ int StudentWorld::dirOfClosestPerson(Actor* curActor)
 bool StudentWorld::objectOverlap(Actor* A, Actor* B)
 {
 	if (euclidianDistance(A, B) <= 100)
-		return true;
-	else
-		return false;
-}
-
-bool StudentWorld::exitPen(Actor* exitPtr)
-{
-	if (objectOverlap(m_pen, exitPtr))
 		return true;
 	else
 		return false;

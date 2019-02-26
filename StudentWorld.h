@@ -24,9 +24,6 @@ public:
 	// are gone.
 	void recordLevelFinishedIfAllCitizensGone();
 
-	// For each actor overlapping a, activate a if appropriate.
-	void activateOnAppropriateActors(Actor* a);
-
 	// Is creation of a flame blocked at the indicated location?
 	bool isFlameBlockedAt(double x, double y) const;
 
@@ -66,12 +63,11 @@ public:
 	// Determines blocking of movement
 	bool isAgentMovementBlockedAt(Actor* curActor, double dest_x, double dest_y);
 
+	// For each actor overlapping a, activate a if appropriate.
+	void activateOnAppropriateActors(Actor* a);
+
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);
-
-	// Determines if any actor can exit
-	bool exitPen(Actor* exitPtr);
-	// TODO: exitCitizen
 
 	void setLevelFinished();
 	bool getLevelFinished();

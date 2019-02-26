@@ -21,6 +21,11 @@ StudentWorld* Actor::world() const
 	return m_sWorld;
 }
 
+void Actor::activateIfAppropriate(Actor* a)
+{
+	return;
+}
+
 bool Actor::isDead() const
 {
 	return m_isDead;
@@ -43,6 +48,11 @@ bool Actor::blocksFlame() const
 void Actor::beVomitedOnIfAppropriate()
 {
 	return;
+}
+
+bool Actor::triggersOnlyActiveLandmines() const
+{
+	return false;
 }
 
 bool Actor::triggersZombieVomit() const
@@ -89,6 +99,7 @@ ActivatingObject::ActivatingObject(StudentWorld* w, int imageID, double x, doubl
 Exit::Exit(StudentWorld* w, double x, double y)
 	: ActivatingObject(w, IID_EXIT, x, y, 1, right)
 {
+	cerr << "Create exit" << endl;
 }
 
 bool Exit::blocksFlame() const
@@ -100,18 +111,18 @@ void Exit::doSomething()
 {
 	// TODO: Determine overlap with person
 	// TODO: check if all citizens have exited
-	if (world()->exitPen(this))
-	{
-		world()->setLevelFinished();
-		world()->playSound(SOUND_LEVEL_FINISHED);
-		cerr << "EXIT" << endl;
-	}
-	return;
+	world()->activateOnAppropriateActors(this);
 }
 
 void Exit::activateIfAppropriate(Actor* a)
 {
-	a->useExitIfAppropriate();
+	if (a == this)
+		return;
+	if (world()->objectOverlap(a, this))
+	{
+		a->useExitIfAppropriate();
+	}
+	return;
 }
 
 //// AGENT ////
@@ -245,8 +256,10 @@ void Penelope::doSomething()
 
 void Penelope::useExitIfAppropriate()
 {
-	return;
-	//TODO: IMPLEMENT
+	// TODO: Check
+	world()->setLevelFinished();
+	world()->playSound(SOUND_LEVEL_FINISHED);
+	cerr << "EXIT" << endl;
 }
 
 
