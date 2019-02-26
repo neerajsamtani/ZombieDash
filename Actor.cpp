@@ -164,13 +164,37 @@ void VaccineGoodie::doSomething()
 	world()->activateOnAppropriateActors(this);
 }
 
+// TODO: Get Vaccine to disappear
 void VaccineGoodie::pickUp(Penelope* p)
 {
-	// USER RECEIEVES 50 POINTS
+	world()->increaseScore(50);
 	cerr << "VACCINE ACQUIRED" << endl;
 	this->setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseVaccines();
+}
+
+//// GAS CAN GOODIE ////
+
+GasCanGoodie::GasCanGoodie(StudentWorld* w, double x, double y)
+	: Goodie(w, IID_GAS_CAN_GOODIE, x, y)
+{}
+
+void GasCanGoodie::doSomething()
+{
+	if (isDead())
+		return;
+	world()->activateOnAppropriateActors(this);
+}
+
+// TODO: Get GasCanGoodie to disappear
+void GasCanGoodie::pickUp(Penelope* p)
+{
+	world()->increaseScore(50);
+	cerr << "GAS CAN ACQUIRED" << endl;
+	this->setDead();
+	world()->playSound(SOUND_GOT_GOODIE);
+	p->increaseFlameCharges();
 }
 
 //// AGENT ////
@@ -231,7 +255,9 @@ Penelope::Penelope(StudentWorld* w, double x, double y)
 	: Human(w, IID_PLAYER, x, y),
 	m_landmines(0),
 	m_flamethrowerCharges(0),
-	m_vaccines(0)
+	m_vaccines(0),
+	m_infectionCount(0),
+	m_infectedStatus(false)
 {}
 
 void Penelope::doSomething()
@@ -259,21 +285,26 @@ void Penelope::doSomething()
 		switch (ch)
 		{
 		case KEY_PRESS_SPACE:
-			cerr << "SPACE" << endl;
-			//	TODO: Flamethrower functionality
+			if (getNumFlameCharges() > 0)
+			{
+				m_flamethrowerCharges--;
+				world()->playSound(SOUND_PLAYER_FIRE);
+				cerr << "USED ONE FLAME CHARGE" << endl;
+			}
+			// TODO: Flame functionality
 			break;
 		case KEY_PRESS_TAB:
 			cerr << "TAB" << endl;
 			// TODO: Landmine functionality
 			break;
 		case KEY_PRESS_ENTER:
-			cerr << "ENTER" << endl;
 			if (getNumVaccines() > 0)
 			{
+				m_infectedStatus = false;
+				m_infectionCount = 0;
+				m_vaccines--;
 				cerr << "USED VACCINE" << endl;
 			}
-			// cerr << world()->getLives() << endl;
-			// TODO: Vaccine functionality
 			break;
 			// TODO: Object overlap
 		case KEY_PRESS_LEFT:
@@ -336,7 +367,7 @@ void Penelope::increaseVaccines()
 // Increase the number of flame charges the object has.
 void Penelope::increaseFlameCharges()
 {
-	m_flamethrowerCharges++;
+	m_flamethrowerCharges += 5;
 }
 
 // Increase the number of landmines the object has.

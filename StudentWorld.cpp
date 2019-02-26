@@ -52,13 +52,16 @@ int StudentWorld::init()
 				case Level::empty:
 					break;
 				case Level::citizen:
-					cnt++;
+					//cnt++;
 					// addActor(new Citizen(this, x, y));
 					break;
 				case Level::vaccine_goodie:
+					cnt++;
 					addActor(new VaccineGoodie(this, x, y));
 					break;
 				case Level::gas_can_goodie:
+					cnt++;
+					addActor(new GasCanGoodie(this, x, y));
 					break;
 				case Level::landmine_goodie:
 					break;
@@ -105,7 +108,16 @@ int StudentWorld::move()
 	m_pen->doSomething();
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
-		(*p)->doSomething();
+	{
+		if ((*p)->isDead())
+		{
+			delete *p;
+			list<Actor*>::iterator q = actors.erase(p);
+			p = q;
+		}
+		else
+			(*p)->doSomething();
+	}
 	if (m_pen->isDead())
 		return GWSTATUS_PLAYER_DIED;
 	else if (getLevelFinished())

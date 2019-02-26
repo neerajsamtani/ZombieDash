@@ -113,6 +113,14 @@ public:
 	virtual void pickUp(Penelope* p);
 };
 
+class GasCanGoodie : public Goodie
+{
+public:
+	GasCanGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
 /*
 
 class Pit : public ActivatingObject
@@ -146,14 +154,6 @@ public:
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
 	virtual void dieByFallOrBurnIfAppropriate();
-};
-
-class GasCanGoodie : public Goodie
-{
-public:
-	GasCanGoodie(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-	virtual void pickUp(Penelope* p);
 };
 
 class LandmineGoodie : public Goodie
@@ -226,6 +226,8 @@ private:
 	int m_landmines;
 	int m_flamethrowerCharges;
 	int m_vaccines;
+	int m_infectionCount;
+	bool m_infectedStatus;
 };
 
 class Citizen : public Human
