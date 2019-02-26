@@ -4,6 +4,9 @@
 #include "GraphObject.h"
 #include "GameConstants.h"
 
+class Goodie;
+class Penelope;
+
 class StudentWorld;
 
 // constants required for these classes
@@ -34,13 +37,13 @@ public:
 	virtual void useExitIfAppropriate();
 
 	// If this object can die by falling into a pit or burning, die.
-	//virtual void dieByFallOrBurnIfAppropriate();
+	virtual void dieByFallOrBurnIfAppropriate();
 
 	// If this object can be infected by vomit, get infected.
 	virtual void beVomitedOnIfAppropriate();
 
 	// If this object can pick up goodies, pick up g
-	//virtual void pickUpGoodieIfAppropriate(Goodie* g);
+	virtual void pickUpGoodieIfAppropriate(Goodie* g);
 
 	// Does this object block agent movement?
 	virtual bool blocksMovement() const;
@@ -91,6 +94,25 @@ public:
 	virtual bool blocksFlame() const;
 };
 
+class Goodie : public ActivatingObject
+{
+public:
+	Goodie(StudentWorld* w, int imageID, double x, double y);
+	virtual void activateIfAppropriate(Actor* a);
+	virtual void dieByFallOrBurnIfAppropriate();
+
+	// Have p pick up this goodie.
+	virtual void pickUp(Penelope* p) = 0;
+};
+
+class VaccineGoodie : public Goodie
+{
+public:
+	VaccineGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
 /*
 
 class Pit : public ActivatingObject
@@ -124,25 +146,6 @@ public:
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
 	virtual void dieByFallOrBurnIfAppropriate();
-};
-
-class Goodie : public ActivatingObject
-{
-public:
-	Goodie(StudentWorld* w, int imageID, double x, double y);
-	virtual void activateIfAppropriate(Actor* a);
-	virtual void dieByFallOrBurnIfAppropriate();
-
-	  // Have p pick up this goodie.
-	virtual void pickUp(Penelope* p) = 0;
-};
-
-class VaccineGoodie : public Goodie
-{
-public:
-	VaccineGoodie(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-	virtual void pickUp(Penelope* p);
 };
 
 class GasCanGoodie : public Goodie
@@ -197,7 +200,6 @@ public:
 	virtual void doSomething();
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
-	//virtual void pickUpGoodieIfAppropriate(Goodie* g);
 
 	// Increase the number of vaccines the object has.
 	void increaseVaccines();
@@ -216,6 +218,9 @@ public:
 
 	// How many landmines does the object have?
 	int getNumLandmines() const;
+
+	// If this object can pick up goodies, pick up g
+	virtual void pickUpGoodieIfAppropriate(Goodie* g);
 
 private:
 	int m_landmines;

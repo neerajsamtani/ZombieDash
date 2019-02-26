@@ -35,7 +35,7 @@ int StudentWorld::init()
 	if (result == Level::load_fail_file_not_found)
 		cerr << "Cannot find " << "level0" << getLevel() << ".txt data file" << endl;
 	else if (result == Level::load_fail_bad_format)
-		cerr << "Your level was improperly formatted" << endl;
+		cerr << "Your level was improperly formatted" << endl; // TODO: CHECK IF LEVEL IS SURROUNDED BY WALLS
 	else if (result == Level::load_success)
 	{
 		cerr << "Successfully loaded " << "level0" << getLevel() << ".txt" << endl;
@@ -53,9 +53,10 @@ int StudentWorld::init()
 					break;
 				case Level::citizen:
 					cnt++;
-					addActor(new Citizen(this, x, y));
+					// addActor(new Citizen(this, x, y));
 					break;
 				case Level::vaccine_goodie:
+					addActor(new VaccineGoodie(this, x, y));
 					break;
 				case Level::gas_can_goodie:
 					break;

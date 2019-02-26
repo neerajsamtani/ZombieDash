@@ -65,6 +65,16 @@ void Actor::useExitIfAppropriate()
 	return;
 }
 
+void Actor::dieByFallOrBurnIfAppropriate()
+{
+	return;
+}
+
+void Actor::pickUpGoodieIfAppropriate(Goodie* g)
+{
+	return;
+}
+
 ///// WALL /////
 
 Wall::Wall(StudentWorld * w, double x, double y)
@@ -123,6 +133,44 @@ void Exit::activateIfAppropriate(Actor* a)
 		a->useExitIfAppropriate();
 	}
 	return;
+}
+
+//// GOODIE ////
+
+Goodie::Goodie(StudentWorld* w, int imageID, double x, double y)
+	: ActivatingObject(w, imageID, x, y, 1, right)
+{}
+
+void Goodie::activateIfAppropriate(Actor* a)
+{
+	a->pickUpGoodieIfAppropriate(this);
+}
+
+void Goodie::dieByFallOrBurnIfAppropriate()
+{
+	this->setDead();
+}
+
+//// VACCINE GOODIE ////
+
+VaccineGoodie::VaccineGoodie(StudentWorld* w, double x, double y)
+	: Goodie(w, IID_VACCINE_GOODIE, x, y)
+{}
+
+void VaccineGoodie::doSomething()
+{
+	if (isDead())
+		return;
+	world()->activateOnAppropriateActors(this);
+}
+
+void VaccineGoodie::pickUp(Penelope* p)
+{
+	// USER RECEIEVES 50 POINTS
+	cerr << "VACCINE ACQUIRED" << endl;
+	this->setDead();
+	world()->playSound(SOUND_GOT_GOODIE);
+	p->increaseVaccines();
 }
 
 //// AGENT ////
@@ -220,6 +268,10 @@ void Penelope::doSomething()
 			break;
 		case KEY_PRESS_ENTER:
 			cerr << "ENTER" << endl;
+			if (getNumVaccines() > 0)
+			{
+				cerr << "USED VACCINE" << endl;
+			}
 			// cerr << world()->getLives() << endl;
 			// TODO: Vaccine functionality
 			break;
@@ -265,16 +317,15 @@ void Penelope::useExitIfAppropriate()
 
 void Penelope::dieByFallOrBurnIfAppropriate()
 {
-	return;
+	this->setDead();
 	//TODO: IMPLEMENT
 }
-/*
+
+
 void Penelope::pickUpGoodieIfAppropriate(Goodie* g)
 {
-	return;
-	//TODO: IMPLEMENT
+	g->pickUp(this);
 }
-*/
 
 // Increase the number of vaccines the object has.
 void Penelope::increaseVaccines()
