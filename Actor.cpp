@@ -136,6 +136,7 @@ void Exit::activateIfAppropriate(Actor* a)
 }
 
 //// GOODIE ////
+// TODO: Remove Code Repetition
 
 Goodie::Goodie(StudentWorld* w, int imageID, double x, double y)
 	: ActivatingObject(w, imageID, x, y, 1, right)
@@ -164,7 +165,6 @@ void VaccineGoodie::doSomething()
 	world()->activateOnAppropriateActors(this);
 }
 
-// TODO: Get Vaccine to disappear
 void VaccineGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
@@ -187,7 +187,6 @@ void GasCanGoodie::doSomething()
 	world()->activateOnAppropriateActors(this);
 }
 
-// TODO: Get GasCanGoodie to disappear
 void GasCanGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
@@ -195,6 +194,28 @@ void GasCanGoodie::pickUp(Penelope* p)
 	this->setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseFlameCharges();
+}
+
+//// LANDMINE GOODIE ////
+
+LandmineGoodie::LandmineGoodie(StudentWorld* w, double x, double y)
+	: Goodie(w, IID_LANDMINE_GOODIE, x, y)
+{}
+
+void LandmineGoodie::doSomething()
+{
+	if (isDead())
+		return;
+	world()->activateOnAppropriateActors(this);
+}
+
+void LandmineGoodie::pickUp(Penelope* p)
+{
+	world()->increaseScore(50);
+	cerr << "LANDMINE ACQUIRED" << endl;
+	this->setDead();
+	world()->playSound(SOUND_GOT_GOODIE);
+	p->increaseLandmines();
 }
 
 //// AGENT ////
@@ -294,7 +315,12 @@ void Penelope::doSomething()
 			// TODO: Flame functionality
 			break;
 		case KEY_PRESS_TAB:
-			cerr << "TAB" << endl;
+			if (getNumLandmines() > 0)
+			{
+				// TODO: Add Landmine
+				m_landmines--;
+				cerr << "USED ONE LANDMINE" << endl;
+			}
 			// TODO: Landmine functionality
 			break;
 		case KEY_PRESS_ENTER:
@@ -373,7 +399,7 @@ void Penelope::increaseFlameCharges()
 // Increase the number of landmines the object has.
 void Penelope::increaseLandmines()
 {
-	m_landmines++;
+	m_landmines += 2;
 }
 
 // How many vaccines does the object have?

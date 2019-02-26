@@ -7,7 +7,7 @@
 #include <string>
 #include <list>
 using namespace std;
-
+// TODO: Updates on CS32 website not in spec
 class Actor;
 class Penelope;
 

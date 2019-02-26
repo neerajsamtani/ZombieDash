@@ -121,6 +121,14 @@ public:
 	virtual void pickUp(Penelope* p);
 };
 
+class LandmineGoodie : public Goodie
+{
+public:
+	LandmineGoodie(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void pickUp(Penelope* p);
+};
+
 /*
 
 class Pit : public ActivatingObject
@@ -154,14 +162,6 @@ public:
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
 	virtual void dieByFallOrBurnIfAppropriate();
-};
-
-class LandmineGoodie : public Goodie
-{
-public:
-	LandmineGoodie(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-	virtual void pickUp(Penelope* p);
 };
 
 */

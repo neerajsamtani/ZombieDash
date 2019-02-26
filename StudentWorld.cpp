@@ -2,6 +2,7 @@
 #include "GameConstants.h"
 #include <string>
 #include <sstream>
+#include <iomanip>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetPath)
@@ -64,6 +65,8 @@ int StudentWorld::init()
 					addActor(new GasCanGoodie(this, x, y));
 					break;
 				case Level::landmine_goodie:
+					cnt++;
+					addActor(new LandmineGoodie(this, x, y));
 					break;
 				case Level::smart_zombie:
 					cnt++;
@@ -118,6 +121,20 @@ int StudentWorld::move()
 		else
 			(*p)->doSomething();
 	}
+
+	// Set Status Text
+	ostringstream oss;
+	oss.fill('0');
+	oss << "Score: "<< setw(5) << getScore();
+	oss << "  Level: " << getLevel();
+	oss << "  Lives : " << getLives();
+	oss << "  Vaccines : " << m_pen->getNumVaccines();
+	oss << "  Flames : " << m_pen->getNumFlameCharges();
+	oss << "  Mines : " << m_pen->getNumLandmines();
+	oss << "  Infected : 0";// TODO: Get Number Infected
+	//cerr << oss.str() << endl;
+	setGameStatText(oss.str());
+
 	if (m_pen->isDead())
 		return GWSTATUS_PLAYER_DIED;
 	else if (getLevelFinished())
