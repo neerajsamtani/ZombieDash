@@ -129,6 +129,18 @@ public:
 	virtual void pickUp(Penelope* p);
 };
 
+class Landmine : public ActivatingObject
+{
+public:
+	Landmine(StudentWorld* w, double x, double y);
+	virtual void doSomething();
+	virtual void activateIfAppropriate(Actor* a);
+	virtual void dieByFallOrBurnIfAppropriate();
+private:
+	int m_safetyTicks;
+	bool m_active;
+};
+
 /*
 
 class Pit : public ActivatingObject
@@ -153,15 +165,6 @@ public:
 	Vomit(StudentWorld* w, double x, double y);
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
-};
-
-class Landmine : public ActivatingObject
-{
-public:
-	Landmine(StudentWorld* w, double x, double y);
-	virtual void doSomething();
-	virtual void activateIfAppropriate(Actor* a);
-	virtual void dieByFallOrBurnIfAppropriate();
 };
 
 */

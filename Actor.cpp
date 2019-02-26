@@ -218,6 +218,47 @@ void LandmineGoodie::pickUp(Penelope* p)
 	p->increaseLandmines();
 }
 
+//// LANDMINE ////
+
+Landmine::Landmine(StudentWorld* w, double x, double y)
+	: ActivatingObject(w, IID_LANDMINE, x, y, 1, right),
+	m_safetyTicks(30),
+	m_active(false)
+{}
+
+void Landmine::doSomething()
+{
+	if (isDead())
+		return;
+	if (!m_active)
+	{
+		m_safetyTicks--;
+		if (m_safetyTicks == 0)
+		{
+			m_active = true;
+			return;
+		}
+	}
+	else
+		world()->activateOnAppropriateActors(this);
+}
+
+void Landmine::activateIfAppropriate(Actor* a)
+{
+	if (a->triggersOnlyActiveLandmines())
+	{
+		this->setDead();
+		world()->playSound(SOUND_LANDMINE_EXPLODE);
+		// TODO: Introduce flames and pit
+	}
+}
+
+
+void Landmine::dieByFallOrBurnIfAppropriate()
+{
+	this->setDead();
+}
+
 //// AGENT ////
 
 Agent::Agent(StudentWorld* w, int imageID, double x, double y, int dir)
@@ -318,6 +359,7 @@ void Penelope::doSomething()
 			if (getNumLandmines() > 0)
 			{
 				// TODO: Add Landmine
+				world()->addActor(new Landmine(world(), getX(), getY()));
 				m_landmines--;
 				cerr << "USED ONE LANDMINE" << endl;
 			}

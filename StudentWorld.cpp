@@ -109,8 +109,8 @@ int StudentWorld::move()
 {
 	// TODO: How to win game?
 	m_pen->doSomething();
-	for (list<Actor*>::iterator p = actors.begin();
-		p != actors.end(); p++)
+	list<Actor*>::iterator p = actors.begin();
+	while (p != actors.end())
 	{
 		if ((*p)->isDead())
 		{
@@ -119,7 +119,10 @@ int StudentWorld::move()
 			p = q;
 		}
 		else
+		{
 			(*p)->doSomething();
+			p++;
+		}
 	}
 
 	// Set Status Text
