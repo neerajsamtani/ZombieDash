@@ -689,6 +689,7 @@ void DumbZombie::doSomething()
 void DumbZombie::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
+	world()->increaseScore(1000);
 	// TODO: IMPLEMENT
 }
 
@@ -723,8 +724,7 @@ void SmartZombie::doSomething()
 void SmartZombie::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
-	return;
-	// TODO: IMPLEMENT
+	world()->increaseScore(2000);
 }
 
 void SmartZombie::decideMovementPlan()
