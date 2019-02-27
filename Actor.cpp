@@ -266,6 +266,28 @@ void Pit::activateIfAppropriate(Actor* a)
 	a->dieByFallOrBurnIfAppropriate();
 }
 
+//// FLAME ////
+
+Flame::Flame(StudentWorld* w, double x, double y, int dir)
+	: ActivatingObject(w, IID_FLAME, x, y, 0, dir),
+	m_ticksLeft(2)
+{}
+
+void Flame::doSomething()
+{
+	if (isDead())
+		return;
+	m_ticksLeft--;
+	if (m_ticksLeft <= 0)
+		setDead();
+	world()->activateOnAppropriateActors(this);
+}
+
+void Flame::activateIfAppropriate(Actor* a)
+{
+	a->dieByFallOrBurnIfAppropriate();
+}
+
 
 //// AGENT ////
 
@@ -358,7 +380,38 @@ void Penelope::doSomething()
 			{
 				m_flamethrowerCharges--;
 				world()->playSound(SOUND_PLAYER_FIRE);
-				cerr << "USED ONE FLAME CHARGE" << endl;
+				int direction = getDirection();
+				for (int i = 1; i < 4; i++)
+				{
+					if (direction == up)
+					{
+						if (world()->isFlameBlockedAt(this, getX(), getY() + (i*SPRITE_HEIGHT)))
+							break;
+						else
+							world()->addActor(new Flame(world(), getX(), getY() + (i*SPRITE_HEIGHT) , getDirection()));
+					}
+					else if (direction == down)
+					{
+						if (world()->isFlameBlockedAt(this, getX(), getY() - (i*SPRITE_HEIGHT)))
+							break;
+						else
+							world()->addActor(new Flame(world(), getX(), getY() - (i*SPRITE_HEIGHT), getDirection()));
+					}
+					else if (direction == left)
+					{
+						if (world()->isFlameBlockedAt(this, getX() - (i*SPRITE_WIDTH), getY()))
+							break;
+						else
+							world()->addActor(new Flame(world(), getX() - (i*SPRITE_WIDTH), getY() , getDirection()));
+					}
+					else if (direction == right)
+					{
+						if (world()->isFlameBlockedAt(this, getX() + (i*SPRITE_WIDTH), getY()))
+							break;
+						else
+							world()->addActor(new Flame(world(), getX() + (i*SPRITE_WIDTH), getY(), getDirection()));
+					}
+				}
 			}
 			// TODO: Flame functionality
 			break;
@@ -368,7 +421,6 @@ void Penelope::doSomething()
 				// TODO: Add Landmine
 				world()->addActor(new Landmine(world(), getX(), getY()));
 				m_landmines--;
-				cerr << "USED ONE LANDMINE" << endl;
 			}
 			// TODO: Landmine functionality
 			break;
@@ -378,32 +430,31 @@ void Penelope::doSomething()
 				m_infectionStatus = false;
 				m_infectionCount = 0;
 				m_vaccines--;
-				cerr << "USED VACCINE" << endl;
 			}
 			break;
 			// TODO: Object overlap
 		case KEY_PRESS_LEFT:
 			setDirection(left);
 			dest_x -= 4;
-			if (world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_RIGHT:
 			setDirection(right);
 			dest_x += 4;
-			if (world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_UP:
 			setDirection(up);
 			dest_y += 4;
-			if (world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		case KEY_PRESS_DOWN:
 			setDirection(down);
 			dest_y -= 4;
-			if (world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
 				moveTo(dest_x, dest_y);
 			break;
 		default:
@@ -417,7 +468,6 @@ void Penelope::useExitIfAppropriate()
 	// TODO: Check
 	world()->setLevelFinished();
 	world()->playSound(SOUND_LEVEL_FINISHED);
-	cerr << "EXIT" << endl;
 }
 
 void Penelope::dieByFallOrBurnIfAppropriate()
@@ -610,7 +660,7 @@ void Zombie::move()
 		dest_y -= 1;
 		break;
 	}
-	if (world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+	if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
 	{
 		moveTo(dest_x, dest_y);
 		decMovementPlanDistance();

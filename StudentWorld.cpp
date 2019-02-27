@@ -175,13 +175,13 @@ void StudentWorld::cleanUp()
 	cerr << "Deleted " << cnt << " Actors" << endl;
 }
 
-bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double dest_x, double dest_y)
+bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double x, double y)
 {
 	// Create bounding box for destination
-	int dest_x_start = dest_x;
-	int dest_x_end = (dest_x + SPRITE_WIDTH - 1);
-	int dest_y_start = dest_y;
-	int dest_y_end = (dest_y + SPRITE_HEIGHT - 1);
+	int dest_x_start = x;
+	int dest_x_end = (x + SPRITE_WIDTH - 1);
+	int dest_y_start = y;
+	int dest_y_end = (y + SPRITE_HEIGHT - 1);
 
 	// Check if the destination x and y coordinates are in Penelope's bounding box
 	if (curActor != m_pen)
@@ -206,7 +206,7 @@ bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double dest_x, doub
 				pen_y_start <= dest_y_start && dest_y_start <= pen_y_end)
 			)
 		{
-			return false;
+			return true;
 		}
 	}
 
@@ -240,11 +240,56 @@ bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double dest_x, doub
 					actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
 				)
 			{
-				return false;
+				return true;
 			}
 		}
 	}
-	return true;
+	return false;
+}
+
+bool StudentWorld::isFlameBlockedAt(Actor* curActor, double x, double y)
+{
+	// Create bounding box for destination
+	int dest_x_start = x;
+	int dest_x_end = (x + SPRITE_WIDTH - 1);
+	int dest_y_start = y;
+	int dest_y_end = (y + SPRITE_HEIGHT - 1);
+
+	// Check if the destination x and y coordinates are in any other actor's bounding box
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		if (*p == curActor)
+			continue;
+		// Actors cannot walk through solid objects
+		if ((*p)->blocksFlame())
+		{
+
+			// Create bounding box for current actor
+			int actor_x_start = (*p)->getX();
+			int actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+			int actor_y_start = (*p)->getY();
+			int actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+
+			// Check if the bouding boxes overlap
+			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+				actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void StudentWorld::activateOnAppropriateActors(Actor* a)

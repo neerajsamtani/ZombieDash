@@ -149,15 +149,17 @@ public:
 	virtual void activateIfAppropriate(Actor* a);
 };
 
-/*
-
 class Flame : public ActivatingObject
 {
 public:
 	Flame(StudentWorld* w, double x, double y, int dir);
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
+private:
+	int m_ticksLeft;
 };
+
+/*
 
 class Vomit : public ActivatingObject
 {
@@ -240,14 +242,15 @@ public:
 	virtual void doSomething();
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
-	int  getCurrentTick();
-	void nextTick();
 
 	int  getMovementPlanDistance();
 	void setMovementPlanDistance(int x);
 	void decMovementPlanDistance();
 
 private:
+
+	int  getCurrentTick();
+	void nextTick();
 
 	int m_movementPlanDistance;
 	int m_currentTick;
@@ -265,14 +268,14 @@ public:
 	virtual void decideMovementPlan() = 0;
 	void move();
 
-	int  getCurrentTick();
-	void nextTick();
-
 	int  getMovementPlanDistance();
 	void setMovementPlanDistance(int x);
 	void decMovementPlanDistance();
 
 private:
+
+	int  getCurrentTick();
+	void nextTick();
 
 	int m_movementPlanDistance;
 	int m_currentTick;
