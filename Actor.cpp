@@ -202,7 +202,6 @@ void LandmineGoodie::doSomething()
 void LandmineGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	cerr << "LANDMINE ACQUIRED" << endl;
 	this->setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseLandmines();
@@ -240,32 +239,32 @@ void Landmine::explode()
 	world()->playSound(SOUND_LANDMINE_EXPLODE);
 	// Assume the flame's direction is in the direction of the Landmine
 	if (!(world()->isFlameBlockedAt(this, getX(), getY())))
-		world()->addActor(new Flame(world(), getX(), getY(), getDirection()));
+		world()->addActor(new Flame(world(), getX(), getY(), up));
 	// Introduce Flames
 	// North
 	if (!(world()->isFlameBlockedAt(this, getX(), getY() + SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX(), getY() + SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX(), getY() + SPRITE_HEIGHT, up));
 	// North-East
 	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY() + SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() + SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() + SPRITE_HEIGHT, up));
 	// East
 	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY())))
-		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY(), getDirection()));
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY(), up));
 	// South-East
 	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY() - SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() - SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() - SPRITE_HEIGHT, up));
 	// South
 	if (!(world()->isFlameBlockedAt(this, getX(), getY() - SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX(), getY() - SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX(), getY() - SPRITE_HEIGHT, up));
 	// South-West
 	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY() - SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() - SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() - SPRITE_HEIGHT, up));
 	// East
 	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY())))
-		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY(), getDirection()));
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY(), up));
 	// North-West
 	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY() + SPRITE_HEIGHT)))
-		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() + SPRITE_HEIGHT, getDirection()));
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() + SPRITE_HEIGHT, up));
 
 	world()->addActor(new Pit(world(), getX(), getY()));
 }
@@ -413,8 +412,8 @@ void Penelope::doSomething()
 	int ch;
 	if (world()->getKey(ch))
 	{
-		int dest_x = getX();
-		int dest_y = getY();
+		double dest_x = getX();
+		double dest_y = getY();
 		// user hit a key during this tick!
 		switch (ch)
 		{
@@ -685,8 +684,8 @@ bool Zombie::startDoSomething()
 void Zombie::move()
 {
 	// Attempt to move zombie in a certain direction
-	int dest_x = getX();
-	int dest_y = getY();
+	double dest_x = getX();
+	double dest_y = getY();
 	switch (getDirection())
 	{
 		// TODO: Check if one pixel is one in this code
@@ -775,8 +774,70 @@ void SmartZombie::decideMovementPlan()
 	// Check if the zombie needs a new movement plan
 	if (getMovementPlanDistance() == 0)
 	{
+		// Create directions array
+		int DIRS[] = { up, down, left, right };
+		
 		setMovementPlanDistance(randInt(3, 10));
-		int direction = world()->dirOfClosestPerson(this);
-		setDirection(direction);
+		// Pointless initial values. Will be changed during function call.
+		double other_x = getX();
+		double other_y = getY();
+		double distance = 0;
+
+		if (world()->locateNearestVomitTrigger(this, other_x, other_y, distance))
+		{
+			// The direction is chosen to be one that would cause the
+			// zombie to get closer to the person
+			// If the zombie is on the same row or column as the person,
+			// choose the(only) direction that gets the zombie closer
+			if (other_x == getX())
+			{
+				if (other_y > getY())
+				{
+					setDirection(up);
+				}
+				else
+					setDirection(down);
+			}
+			else if (other_y == getY())
+			{
+				if (other_x > getX())
+				{
+					setDirection(right);
+				}
+				else
+					setDirection(left);
+			}
+			else
+				// Otherwise, choose randomly between the two directions
+				// (one horizontal and one vertical) that get the zombie closer
+			{
+				// Set possible directions
+				int possibleDirs[2];
+				if (other_x > getX())
+				{
+					possibleDirs[0] = right;
+					if (other_y > getY())
+						possibleDirs[1] = up;
+					else
+						possibleDirs[1] = down;
+				}
+				else
+				{
+					possibleDirs[0] = left;
+					if (other_y > getY())
+						possibleDirs[1] = up;
+					else
+						possibleDirs[1] = down;
+				}
+				setDirection(possibleDirs[randInt(0, 1)]);
+			}
+		}
+		else
+		{
+			// If the distance to the selected nearest person is more than 80 pixels
+			// away, the direction is randomly chosen from up, down, left, and right.
+			setDirection(DIRS[randInt(0, 3)]);
+		}
+
 	}
 }

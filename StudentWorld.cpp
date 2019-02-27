@@ -5,6 +5,16 @@
 #include <iomanip>
 using namespace std;
 
+double euclidianDistance(Actor* A, Actor* B)
+{
+	// TODO: Double check the following note
+	// Note that distance between centers is equal to distance between corners
+	double deltaX = (A->getX()) - (B->getX());
+	double deltaY = (A->getY()) - (B->getY());
+
+	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
+}
+
 GameWorld* createStudentWorld(string assetPath)
 {
 	return new StudentWorld(assetPath);
@@ -46,8 +56,8 @@ int StudentWorld::init()
 			for (int level_y = 0; level_y < SPRITE_HEIGHT; level_y++)
 			{
 				Level::MazeEntry ge = lev.getContentsOf(level_x, level_y);
-				int x = level_x * SPRITE_WIDTH;
-				int y = level_y * SPRITE_HEIGHT;
+				double x = level_x * SPRITE_WIDTH;
+				double y = level_y * SPRITE_HEIGHT;
 				switch (ge)
 				{
 				case Level::empty:
@@ -178,19 +188,19 @@ void StudentWorld::cleanUp()
 bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double x, double y)
 {
 	// Create bounding box for destination
-	int dest_x_start = x;
-	int dest_x_end = (x + SPRITE_WIDTH - 1);
-	int dest_y_start = y;
-	int dest_y_end = (y + SPRITE_HEIGHT - 1);
+	double dest_x_start = x;
+	double dest_x_end = (x + SPRITE_WIDTH - 1);
+	double dest_y_start = y;
+	double dest_y_end = (y + SPRITE_HEIGHT - 1);
 
 	// Check if the destination x and y coordinates are in Penelope's bounding box
 	if (curActor != m_pen)
 	{
 		// Create bounding box for current actor
-		int pen_x_start = m_pen->getX();
-		int pen_x_end = (m_pen->getX() + SPRITE_WIDTH - 1);
-		int pen_y_start = m_pen->getY();
-		int pen_y_end = (m_pen->getY() + SPRITE_HEIGHT - 1);
+		double pen_x_start = m_pen->getX();
+		double pen_x_end = (m_pen->getX() + SPRITE_WIDTH - 1);
+		double pen_y_start = m_pen->getY();
+		double pen_y_end = (m_pen->getY() + SPRITE_HEIGHT - 1);
 
 		// Check if the bouding boxes overlap
 		if ((pen_x_start <= dest_x_start && dest_x_start <= pen_x_end &&
@@ -221,10 +231,10 @@ bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double x, double y)
 		{
 
 			// Create bounding box for current actor
-			int actor_x_start = (*p)->getX();
-			int actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
-			int actor_y_start = (*p)->getY();
-			int actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+			double actor_x_start = (*p)->getX();
+			double actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+			double actor_y_start = (*p)->getY();
+			double actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
 
 			// Check if the bouding boxes overlap
 			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
@@ -250,10 +260,10 @@ bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double x, double y)
 bool StudentWorld::isFlameBlockedAt(Actor* curActor, double x, double y)
 {
 	// Create bounding box for destination
-	int dest_x_start = x;
-	int dest_x_end = (x + SPRITE_WIDTH - 1);
-	int dest_y_start = y;
-	int dest_y_end = (y + SPRITE_HEIGHT - 1);
+	double dest_x_start = x;
+	double dest_x_end = (x + SPRITE_WIDTH - 1);
+	double dest_y_start = y;
+	double dest_y_end = (y + SPRITE_HEIGHT - 1);
 
 	// Check if the destination x and y coordinates are in any other actor's bounding box
 	for (list<Actor*>::iterator p = actors.begin();
@@ -261,15 +271,58 @@ bool StudentWorld::isFlameBlockedAt(Actor* curActor, double x, double y)
 	{
 		if (*p == curActor)
 			continue;
-		// Actors cannot walk through solid objects
+		// Flames cannot go through certain objects
 		if ((*p)->blocksFlame())
 		{
 
 			// Create bounding box for current actor
-			int actor_x_start = (*p)->getX();
-			int actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
-			int actor_y_start = (*p)->getY();
-			int actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+			double actor_x_start = (*p)->getX();
+			double actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+			double actor_y_start = (*p)->getY();
+			double actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+
+			// Check if the bouding boxes overlap
+			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+				actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+				||
+				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+					actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+				)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool StudentWorld::isZombieVomitTriggerAt(Actor* curActor, double x, double y)
+{
+	// Create bounding box for destination
+	double dest_x_start = x;
+	double dest_x_end = (x + SPRITE_WIDTH - 1);
+	double dest_y_start = y;
+	double dest_y_end = (y + SPRITE_HEIGHT - 1);
+
+	// Check if the destination x and y coordinates are in any other actor's bounding box
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		// Only certain actors trigger zombie vomit
+		if ((*p)->triggersZombieVomit())
+		{
+
+			// Create bounding box for current actor
+			double actor_x_start = (*p)->getX();
+			double actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+			double actor_y_start = (*p)->getY();
+			double actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
 
 			// Check if the bouding boxes overlap
 			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
@@ -308,97 +361,39 @@ void StudentWorld::activateOnAppropriateActors(Actor* a)
 	}
 }
 
-int euclidianDistance(Actor* A, Actor* B)
+bool StudentWorld::locateNearestVomitTrigger(Actor* curActor, double& otherX, double& otherY, double& distance)
 {
-	// TODO: Double check the following note
-	// Note that distance between centers is equal to distance between corners
-	int deltaX = (A->getX()) - (B->getX());
-	int deltaY = (A->getY()) - (B->getY());
-
-	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
-}
-
-int StudentWorld::dirOfClosestPerson(Actor* curActor)
-{
-	const int right = curActor->right;
-	const int left = curActor->left;
-	const int up = curActor->up;
-	const int down = curActor->down;
-	const int DIRS[] = { right, left, up, down };
 	// Select closest person
 	// Assume Penelope is the closest
-	int minDistance = euclidianDistance(curActor, m_pen);
-	Actor* closestActor = m_pen;
-	// Check if other actors are closer
-	for (list<Actor*>::iterator p = actors.begin();
-		p != actors.end(); p++)
+	if (!m_pen->isDead())
 	{
-		// Ensure that the zombie doesn't pick itself 
-		// and check if the character can be infected
-		if (*p != curActor && (*p)->triggersZombieVomit())
+		double minDistance = euclidianDistance(curActor, m_pen);
+		Actor* closestActor = m_pen;
+		// Check if other actors are closer
+		for (list<Actor*>::iterator p = actors.begin();
+			p != actors.end(); p++)
 		{
-			int distance = euclidianDistance(curActor, *p);
-			if (distance < minDistance)
+			// The zombie doesn't pick itself 
+			// Check if the character can be infected and is alive
+			if ((*p)->triggersZombieVomit() && !((*p)->isDead()))
 			{
-				minDistance = distance;
-				closestActor = *p;
+				double tempDistance = euclidianDistance(curActor, *p);
+				if (tempDistance < minDistance)
+				{
+					minDistance = tempDistance;
+					closestActor = *p;
+				}
 			}
 		}
+		otherX = closestActor->getX();
+		otherY = closestActor->getY();
+		distance = minDistance;
+		return true;
 	}
-	// If the distance to the selected nearest person is more than 80 pixels
-	// away, the direction is chosen from up, down, left, and right.
-	if (euclidianDistance(curActor, closestActor) > (80 * 80))
-		return (DIRS[randInt(0, 3)]);
-	// Otherwise, the direction is chosen to be one that would cause the
-	// zombie to get closer to the person
 	else
-	{
-		// If the zombie is on the same row or column as the person,
-		// choose the(only) direction that gets the zombie closer
-		if (closestActor->getX() == curActor->getX())
-		{
-			if (closestActor->getY() > curActor->getY())
-			{
-				return (up);
-			}
-			else
-				return (down);
-		}
-		else if (closestActor->getY() == curActor->getY())
-		{
-			if (closestActor->getX() > curActor->getX())
-			{
-				return (right);
-			}
-			else
-				return (left);
-		}
-		else
-		// Otherwise, choose randomly between the two directions
-		// (one horizontal and one vertical) that get the zombie closer
-		{
-			// Set possible directions
-			int possibleDirs[2];
-			if (closestActor->getX() > curActor->getX())
-			{
-				possibleDirs[0] = right;
-				if (closestActor->getY() > curActor->getY())
-					possibleDirs[1] = up;
-				else
-					possibleDirs[1] = down;
-			}
-			else
-			{
-				possibleDirs[0] = left;
-				if (closestActor->getY() > curActor->getY())
-					possibleDirs[1] = up;
-				else
-					possibleDirs[1] = down;
-			}
-			return (possibleDirs[randInt(0, 1)]);
-		}
+		// If Penelope is dead, the level ends and this function will not be called
+		return false;
 
-	}
 }
 
 bool StudentWorld::objectOverlap(Actor* A, Actor* B)

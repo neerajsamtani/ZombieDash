@@ -24,15 +24,6 @@ public:
 	// are gone.
 	void recordLevelFinishedIfAllCitizensGone();
 
-	// Is there something at the indicated location that might cause a
-	// zombie to vomit (i.e., a human)?
-	bool isZombieVomitTriggerAt(double x, double y) const;
-
-	// Return true if there is a living human, otherwise false.  If true,
-	// otherX, otherY, and distance will be set to the location and distance
-	// of the human nearest to (x,y).
-	bool locateNearestVomitTrigger(double x, double y, double& otherX, double& otherY, double& distance);
-
 	// Return true if there is a living zombie or Penelope, otherwise false.
 	// If true, otherX, otherY, and distance will be set to the location and
 	// distance of the one nearest to (x,y), and isThreat will be set to true
@@ -54,6 +45,8 @@ public:
     virtual int move();
     virtual void cleanUp();
 
+	//TODO: Remove code repetition in is____At() functions
+
 	// Add an actor to the world.
 	void addActor(Actor* a);
 
@@ -66,13 +59,20 @@ public:
 	// For each actor overlapping a, activate a if appropriate.
 	void activateOnAppropriateActors(Actor* a);
 
+	// Is there something at the indicated location that might cause a
+	// zombie to vomit (i.e., a human)?
+	bool isZombieVomitTriggerAt(Actor* curActor, double x, double y);
+
+	// Return true if there is a living human, otherwise false.  If true,
+	// otherX, otherY, and distance will be set to the location and distance
+	// of the human nearest to (x,y).
+	bool locateNearestVomitTrigger(Actor* curActor, double& otherX, double& otherY, double& distance);
+
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);
 
 	void setLevelFinished();
 	bool getLevelFinished();
-
-	int dirOfClosestPerson(Actor* curActor);
 
 private:
 	Penelope *m_pen;

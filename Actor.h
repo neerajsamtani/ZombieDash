@@ -245,6 +245,8 @@ public:
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
 
+	// TODO: change movementPlanDistance from int to double
+
 	int  getMovementPlanDistance();
 	void setMovementPlanDistance(int x);
 	void decMovementPlanDistance();
