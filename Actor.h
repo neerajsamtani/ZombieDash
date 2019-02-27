@@ -137,6 +137,7 @@ public:
 	virtual void activateIfAppropriate(Actor* a);
 	virtual void dieByFallOrBurnIfAppropriate();
 private:
+	void explode();
 	int m_safetyTicks;
 	bool m_active;
 };
@@ -155,6 +156,7 @@ public:
 	Flame(StudentWorld* w, double x, double y, int dir);
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
+	virtual bool blocksFlame() const;
 private:
 	int m_ticksLeft;
 };

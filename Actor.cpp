@@ -233,21 +233,54 @@ void Landmine::doSomething()
 		world()->activateOnAppropriateActors(this);
 }
 
+void Landmine::explode()
+{
+	// set the landmine to dead (not the person)
+	setDead();
+	world()->playSound(SOUND_LANDMINE_EXPLODE);
+	// Assume the flame's direction is in the direction of the Landmine
+	if (!(world()->isFlameBlockedAt(this, getX(), getY())))
+		world()->addActor(new Flame(world(), getX(), getY(), getDirection()));
+	// Introduce Flames
+	// North
+	if (!(world()->isFlameBlockedAt(this, getX(), getY() + SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX(), getY() + SPRITE_HEIGHT, getDirection()));
+	// North-East
+	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY() + SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() + SPRITE_HEIGHT, getDirection()));
+	// East
+	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY())))
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY(), getDirection()));
+	// South-East
+	if (!(world()->isFlameBlockedAt(this, getX() + SPRITE_WIDTH, getY() - SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX() + SPRITE_WIDTH, getY() - SPRITE_HEIGHT, getDirection()));
+	// South
+	if (!(world()->isFlameBlockedAt(this, getX(), getY() - SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX(), getY() - SPRITE_HEIGHT, getDirection()));
+	// South-West
+	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY() - SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() - SPRITE_HEIGHT, getDirection()));
+	// East
+	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY())))
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY(), getDirection()));
+	// North-West
+	if (!(world()->isFlameBlockedAt(this, getX() - SPRITE_WIDTH, getY() + SPRITE_HEIGHT)))
+		world()->addActor(new Flame(world(), getX() - SPRITE_WIDTH, getY() + SPRITE_HEIGHT, getDirection()));
+
+	world()->addActor(new Pit(world(), getX(), getY()));
+}
+
 void Landmine::activateIfAppropriate(Actor* a)
 {
 	if (a->triggersOnlyActiveLandmines())
 	{
-		world()->addActor(new Pit(world(), getX(), getY()));
-		setDead();
-		world()->playSound(SOUND_LANDMINE_EXPLODE);
-		// TODO: Introduce flames
+		explode();
 	}
 }
 
-
 void Landmine::dieByFallOrBurnIfAppropriate()
 {
-	setDead();
+	explode();
 }
 
 //// PIT ////
@@ -263,7 +296,9 @@ void Pit::doSomething()
 
 void Pit::activateIfAppropriate(Actor* a)
 {
-	a->dieByFallOrBurnIfAppropriate();
+	// Pit shouldn't try to kill a dead object
+	if(!(a->isDead()))
+		a->dieByFallOrBurnIfAppropriate();
 }
 
 //// FLAME ////
@@ -285,7 +320,15 @@ void Flame::doSomething()
 
 void Flame::activateIfAppropriate(Actor* a)
 {
-	a->dieByFallOrBurnIfAppropriate();
+	// Flame shouldn't try to kill a dead object
+	if (!(a->isDead()))
+		a->dieByFallOrBurnIfAppropriate();
+}
+
+bool Flame::blocksFlame() const
+{
+	// Assume a flame blocks another flame
+	return true;
 }
 
 
