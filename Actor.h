@@ -141,8 +141,6 @@ private:
 	bool m_active;
 };
 
-/*
-
 class Pit : public ActivatingObject
 {
 public:
@@ -150,6 +148,8 @@ public:
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
 };
+
+/*
 
 class Flame : public ActivatingObject
 {
@@ -230,7 +230,7 @@ private:
 	int m_flamethrowerCharges;
 	int m_vaccines;
 	int m_infectionCount;
-	bool m_infectedStatus;
+	bool m_infectionStatus;
 };
 
 class Citizen : public Human
@@ -240,6 +240,19 @@ public:
 	virtual void doSomething();
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
+	int  getCurrentTick();
+	void nextTick();
+
+	int  getMovementPlanDistance();
+	void setMovementPlanDistance(int x);
+	void decMovementPlanDistance();
+
+private:
+
+	int m_movementPlanDistance;
+	int m_currentTick;
+	bool m_infectionStatus;
+	int m_infectionCount;
 };
 
 

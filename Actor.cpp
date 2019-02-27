@@ -3,18 +3,11 @@
 
 ///// ACTOR /////
 
-/*
-Actor::Actor(int imageID, double startX, double startY, StudentWorld* sWorld,
-	bool isSolidObject = NOT_SOLID_OBJECT, bool canInfect = CANNOT_INFECT,
-	int startDirection = 0, int depth = 0)
-*/
-
 Actor::Actor(StudentWorld * w, int imageID, double x, double y, int depth, int dir)
 	:GraphObject(imageID, x, y, dir, depth),
 	m_sWorld(w),
 	m_isDead(false)
-{
-}
+{}
 
 StudentWorld* Actor::world() const
 {
@@ -101,16 +94,13 @@ bool Wall::blocksFlame() const
 
 ActivatingObject::ActivatingObject(StudentWorld* w, int imageID, double x, double y, int depth, int dir)
 	:Actor(w, imageID, x, y, depth, dir)
-{
-}
+{}
 
 ///// EXIT /////
 
 Exit::Exit(StudentWorld* w, double x, double y)
 	: ActivatingObject(w, IID_EXIT, x, y, 1, right)
-{
-	cerr << "Create exit" << endl;
-}
+{}
 
 bool Exit::blocksFlame() const
 {
@@ -149,7 +139,7 @@ void Goodie::activateIfAppropriate(Actor* a)
 
 void Goodie::dieByFallOrBurnIfAppropriate()
 {
-	this->setDead();
+	setDead();
 }
 
 //// VACCINE GOODIE ////
@@ -247,17 +237,35 @@ void Landmine::activateIfAppropriate(Actor* a)
 {
 	if (a->triggersOnlyActiveLandmines())
 	{
-		this->setDead();
+		world()->addActor(new Pit(world(), getX(), getY()));
+		setDead();
 		world()->playSound(SOUND_LANDMINE_EXPLODE);
-		// TODO: Introduce flames and pit
+		// TODO: Introduce flames
 	}
 }
 
 
 void Landmine::dieByFallOrBurnIfAppropriate()
 {
-	this->setDead();
+	setDead();
 }
+
+//// PIT ////
+
+Pit::Pit(StudentWorld* w, double x, double y)
+	: ActivatingObject(w, IID_PIT, x, y, 0, right)
+{}
+
+void Pit::doSomething()
+{
+	world()->activateOnAppropriateActors(this);
+}
+
+void Pit::activateIfAppropriate(Actor* a)
+{
+	a->dieByFallOrBurnIfAppropriate();
+}
+
 
 //// AGENT ////
 
@@ -280,8 +288,7 @@ Human::Human(StudentWorld* w, int imageID, double x, double y)
 	: Agent(w, imageID, x, y, right),
 	m_infectionStatus(false),
 	m_infectionCount(0)
-{
-}
+{}
 
 void Human::beVomitedOnIfAppropriate()
 {
@@ -319,7 +326,7 @@ Penelope::Penelope(StudentWorld* w, double x, double y)
 	m_flamethrowerCharges(0),
 	m_vaccines(0),
 	m_infectionCount(0),
-	m_infectedStatus(false)
+	m_infectionStatus(false)
 {}
 
 void Penelope::doSomething()
@@ -368,7 +375,7 @@ void Penelope::doSomething()
 		case KEY_PRESS_ENTER:
 			if (getNumVaccines() > 0)
 			{
-				m_infectedStatus = false;
+				m_infectionStatus = false;
 				m_infectionCount = 0;
 				m_vaccines--;
 				cerr << "USED VACCINE" << endl;
@@ -413,10 +420,9 @@ void Penelope::useExitIfAppropriate()
 	cerr << "EXIT" << endl;
 }
 
-
 void Penelope::dieByFallOrBurnIfAppropriate()
 {
-	this->setDead();
+	setDead();
 	//TODO: IMPLEMENT
 }
 
@@ -465,25 +471,79 @@ int Penelope::getNumLandmines() const
 //// CITIZEN ////
 
 Citizen::Citizen(StudentWorld* w, double x, double y)
-	: Human(w, IID_CITIZEN, x, y)
+	: Human(w, IID_CITIZEN, x, y),
+	m_infectionStatus(false),
+	m_infectionCount(0),
+	m_movementPlanDistance(0), 
+	m_currentTick(0)
+{}
+
+int Citizen::getCurrentTick()
 {
+	return m_currentTick;
+}
+void Citizen::nextTick()
+{
+	m_currentTick++;
+}
+
+int  Citizen::getMovementPlanDistance()
+{
+	return m_movementPlanDistance;
+}
+void Citizen::setMovementPlanDistance(int x)
+{
+	m_movementPlanDistance = x;
+}
+void Citizen::decMovementPlanDistance()
+{
+	m_movementPlanDistance--;
 }
 
 void Citizen::doSomething()
 {
-	return;
-	//TODO: IMPLEMENT
+	// Increase tick counter
+	nextTick();
+	// Check if Citizen is dead
+	if (isDead())
+		return;
+	if (m_infectionStatus)
+	{
+		m_infectionCount++;
+		if (m_infectionCount >= 500)
+		{
+			setDead();
+			world()->playSound(SOUND_ZOMBIE_BORN);
+			world()->increaseScore(-1000);
+			int n = randInt(1, 10);
+			// 30% chance of smart zombie
+			if (1 <= n && n <= 3)
+			{
+				world()->addActor(new SmartZombie(world(), getX(), getY()));
+			}
+			else
+				world()->addActor(new DumbZombie(world(), getX(), getY()));
+			return;
+		}
+	}
+	// Check if Citizen is paralized
+	if (getCurrentTick() % 2 == 0)
+		return;
+	// TODO: Move
 }
 void Citizen::useExitIfAppropriate()
 {
-	return;
-	//TODO: IMPLEMENT
+	// Don't decrease score
+	setDead();
 }
 void Citizen::dieByFallOrBurnIfAppropriate()
 {
-	return;
-	//TODO: IMPLEMENT
+	setDead();
+	world()->playSound(SOUND_CITIZEN_DIE);
+	world()->increaseScore(-1000);
 }
+
+// TODO: Infect
 
 ///// ZOMBIE /////
 
@@ -578,7 +638,7 @@ void DumbZombie::doSomething()
 }
 void DumbZombie::dieByFallOrBurnIfAppropriate()
 {
-	return;
+	setDead();
 	// TODO: IMPLEMENT
 }
 
@@ -612,6 +672,7 @@ void SmartZombie::doSomething()
 }
 void SmartZombie::dieByFallOrBurnIfAppropriate()
 {
+	setDead();
 	return;
 	// TODO: IMPLEMENT
 }

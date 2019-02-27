@@ -53,8 +53,8 @@ int StudentWorld::init()
 				case Level::empty:
 					break;
 				case Level::citizen:
-					//cnt++;
-					// addActor(new Citizen(this, x, y));
+					cnt++;
+					addActor(new Citizen(this, x, y));
 					break;
 				case Level::vaccine_goodie:
 					cnt++;
@@ -139,7 +139,10 @@ int StudentWorld::move()
 	setGameStatText(oss.str());
 
 	if (m_pen->isDead())
+	{
+		decLives();
 		return GWSTATUS_PLAYER_DIED;
+	}
 	else if (getLevelFinished())
 		return GWSTATUS_FINISHED_LEVEL;
 	else
