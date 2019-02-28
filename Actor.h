@@ -40,7 +40,7 @@ public:
 	virtual void dieByFallOrBurnIfAppropriate();
 
 	// If this object can be infected by vomit, get infected.
-	virtual void beVomitedOnIfAppropriate();
+	virtual void beVomitedOnIfAppropriate(); // TODO
 
 	// If this object can pick up goodies, pick up g
 	virtual void pickUpGoodieIfAppropriate(Goodie* g);
@@ -161,17 +161,15 @@ private:
 	int m_ticksLeft;
 };
 
-/*
-
 class Vomit : public ActivatingObject
 {
 public:
-	Vomit(StudentWorld* w, double x, double y);
+	Vomit(StudentWorld* w, double x, double y, int dir);
 	virtual void doSomething();
 	virtual void activateIfAppropriate(Actor* a);
+private:
+	int m_ticksLeft;
 };
-
-*/
 
 class Agent : public Actor
 {
@@ -236,8 +234,6 @@ private:
 	int m_landmines;
 	int m_flamethrowerCharges;
 	int m_vaccines;
-	int m_infectionCount;
-	bool m_infectionStatus;
 };
 
 // TODO: MERGE CITIZEN MOVE AND ZOMBIE MOVE
@@ -259,8 +255,6 @@ private:
 	void nextTick();
 
 	int m_currentTick;
-	bool m_infectionStatus;
-	int m_infectionCount;
 };
 
 
@@ -282,6 +276,8 @@ public:
 
 	// Does this object trigger citizens to follow it or flee it?
 	virtual bool triggersCitizens() const;
+
+	bool vomit();
 
 private:
 

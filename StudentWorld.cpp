@@ -7,7 +7,6 @@ using namespace std;
 
 double euclidianDistance(Actor* A, Actor* B)
 {
-	// TODO: Double check the following note
 	// Note that distance between centers is equal to distance between corners
 	double deltaX = (A->getX()) - (B->getX());
 	double deltaY = (A->getY()) - (B->getY());
@@ -17,7 +16,6 @@ double euclidianDistance(Actor* A, Actor* B)
 
 double euclidianDistance(double x, double y, Actor* B)
 {
-	// TODO: Double check the following note
 	// Note that distance between centers is equal to distance between corners
 	double deltaX = (x) - (B->getX());
 	double deltaY = (y) - (B->getY());
@@ -101,7 +99,6 @@ int StudentWorld::init()
 					addActor(new DumbZombie(this, x, y));
 					break;
 				case Level::player:
-					cerr << "Creating Penelope" << endl;
 					m_pen = new Penelope(this, x, y);
 					break;
 				case Level::exit:
@@ -132,7 +129,6 @@ void StudentWorld::addActor(Actor * a)
 
 int StudentWorld::move()
 {
-	// TODO: How to win game?
 	m_pen->doSomething();
 	list<Actor*>::iterator p = actors.begin();
 	while (p != actors.end())
@@ -159,7 +155,7 @@ int StudentWorld::move()
 	oss << "  Vaccines : " << m_pen->getNumVaccines();
 	oss << "  Flames : " << m_pen->getNumFlameCharges();
 	oss << "  Mines : " << m_pen->getNumLandmines();
-	oss << "  Infected : 0";// TODO: Get Number Infected
+	oss << "  Infected : " << m_pen->getInfectionDuration();
 	//cerr << oss.str() << endl;
 	setGameStatText(oss.str());
 
@@ -320,42 +316,21 @@ bool StudentWorld::isFlameBlockedAt(Actor* curActor, double x, double y)
 
 bool StudentWorld::isZombieVomitTriggerAt(Actor* curActor, double x, double y)
 {
-	// Create bounding box for destination
-	double dest_x_start = x;
-	double dest_x_end = (x + SPRITE_WIDTH - 1);
-	double dest_y_start = y;
-	double dest_y_end = (y + SPRITE_HEIGHT - 1);
+	// Check if the distance between Penelope and the x and y coordinates
+	// are less than a Euclidian distance of 100 away
+	if (euclidianDistance(x, y, m_pen) <= 100)
+	{
+		return true;
+	}
 
-	// Check if the destination x and y coordinates are in any other actor's bounding box
+	// Check if the distance between the current actor and the x and y coordinates
+	// are less than a Euclidian distance of 100 away
 	for (list<Actor*>::iterator p = actors.begin();
 		p != actors.end(); p++)
 	{
-		// Only certain actors trigger zombie vomit
-		if ((*p)->triggersZombieVomit())
+		if ((*p)->triggersZombieVomit() && euclidianDistance(x, y, (*p)) <= 100)
 		{
-
-			// Create bounding box for current actor
-			double actor_x_start = (*p)->getX();
-			double actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
-			double actor_y_start = (*p)->getY();
-			double actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
-
-			// Check if the bouding boxes overlap
-			if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
-				actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
-				||
-				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
-					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
-				||
-				(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
-					actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
-				||
-				(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
-					actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
-				)
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;

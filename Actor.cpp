@@ -120,8 +120,6 @@ bool Exit::blocksFlame() const
 void Exit::doSomething()
 {
 	world()->activateOnAppropriateActors(this);
-	// TODO: Determine overlap with person
-	// TODO: check if all citizens have exited
 }
 
 void Exit::activateIfAppropriate(Actor* a)
@@ -338,6 +336,36 @@ bool Flame::blocksFlame() const
 	return true;
 }
 
+//// VOMIT ////
+
+Vomit::Vomit(StudentWorld* w, double x, double y, int dir)
+	: ActivatingObject(w, IID_VOMIT, x, y, 0, dir),
+	m_ticksLeft(2)
+{}
+
+void Vomit::doSomething()
+{
+	if (!isDead())
+	{
+		m_ticksLeft--;
+		//cerr << "Tick" << endl;
+		if (m_ticksLeft <= 0)
+		{
+			setDead();
+			cerr << "Dead" << endl;
+		}
+		else
+			world()->activateOnAppropriateActors(this);
+	}
+}
+
+void Vomit::activateIfAppropriate(Actor* a)
+{
+	// Vomit shouldn't try to infect a dead object
+	if (!(a->isDead()) && a->triggersZombieVomit())
+		a->beVomitedOnIfAppropriate();
+}
+
 
 //// AGENT ////
 
@@ -364,9 +392,11 @@ Human::Human(StudentWorld* w, int imageID, double x, double y)
 
 void Human::beVomitedOnIfAppropriate()
 {
-	return;
-	// TODO: COMPLETE
+	m_infectionStatus = true;
+	incInfectionDuration();
+	// TODO: RECORD INFECTION
 }
+
 bool Human::triggersZombieVomit() const
 {
 	return true;
@@ -396,9 +426,7 @@ Penelope::Penelope(StudentWorld* w, double x, double y)
 	: Human(w, IID_PLAYER, x, y),
 	m_landmines(0),
 	m_flamethrowerCharges(0),
-	m_vaccines(0),
-	m_infectionCount(0),
-	m_infectionStatus(false)
+	m_vaccines(0)
 {}
 
 void Penelope::doSomething()
@@ -463,26 +491,21 @@ void Penelope::doSomething()
 					}
 				}
 			}
-			// TODO: Flame functionality
 			break;
 		case KEY_PRESS_TAB:
 			if (getNumLandmines() > 0)
 			{
-				// TODO: Add Landmine
 				world()->addActor(new Landmine(world(), getX(), getY()));
 				m_landmines--;
 			}
-			// TODO: Landmine functionality
 			break;
 		case KEY_PRESS_ENTER:
 			if (getNumVaccines() > 0)
 			{
-				m_infectionStatus = false;
-				m_infectionCount = 0;
+				clearInfection();
 				m_vaccines--;
 			}
 			break;
-			// TODO: Object overlap
 		case KEY_PRESS_LEFT:
 			setDirection(left);
 			dest_x -= 4;
@@ -515,10 +538,8 @@ void Penelope::doSomething()
 
 void Penelope::useExitIfAppropriate()
 {
-	// TODO: Check
 	if (world()->canExit())
 	{
-		cout << "canExit value: " << world()->canExit() << endl;
 		world()->setLevelFinished();
 		world()->playSound(SOUND_LEVEL_FINISHED);
 	}
@@ -581,8 +602,6 @@ bool Penelope::triggersCitizens() const
 
 Citizen::Citizen(StudentWorld* w, double x, double y)
 	: Human(w, IID_CITIZEN, x, y),
-	m_infectionStatus(false),
-	m_infectionCount(0),
 	m_currentTick(0)
 {}
 
@@ -766,12 +785,13 @@ void Citizen::doSomething()
 	// Check if Citizen is dead
 	if (isDead())
 		return;
-	if (m_infectionStatus)
+	if (getInfectionDuration() > 0)
 	{
-		m_infectionCount++;
-		if (m_infectionCount >= 500)
+		incInfectionDuration();
+		if (getInfectionDuration() >= 500)
 		{
 			setDead();
+			world()->recordCitizenGone();
 			world()->playSound(SOUND_ZOMBIE_BORN);
 			world()->increaseScore(-1000);
 			int n = randInt(1, 10);
@@ -891,6 +911,48 @@ bool Zombie::threatensCitizens() const
 	return true;
 }
 
+bool Zombie::vomit()
+{
+	int direction = getDirection();
+	if (direction == up)
+	{
+		if (world()->isZombieVomitTriggerAt(this, getX(), getY() + SPRITE_HEIGHT))
+		{
+			world()->addActor(new Vomit(world(), getX(), getY() + SPRITE_HEIGHT, getDirection()));
+			world()->playSound(SOUND_ZOMBIE_VOMIT);
+			return true;
+		}
+	}
+	else if (direction == down)
+	{
+		if (world()->isZombieVomitTriggerAt(this, getX(), getY() - SPRITE_HEIGHT))
+		{
+			world()->addActor(new Vomit(world(), getX(), getY() - SPRITE_HEIGHT, getDirection()));
+			world()->playSound(SOUND_ZOMBIE_VOMIT);
+			return true;
+		}
+	}
+	else if (direction == left)
+	{
+		if (world()->isZombieVomitTriggerAt(this, getX() - SPRITE_WIDTH, getY()))
+		{
+			world()->addActor(new Vomit(world(), getX() - SPRITE_WIDTH, getY(), getDirection()));
+			world()->playSound(SOUND_ZOMBIE_VOMIT);
+			return true;
+		}
+	}
+	else if (direction == right)
+	{
+		if (world()->isZombieVomitTriggerAt(this, getX() + SPRITE_WIDTH, getY()))
+		{
+			world()->addActor(new Vomit(world(), getX() + SPRITE_WIDTH, getY(), getDirection()));
+			world()->playSound(SOUND_ZOMBIE_VOMIT);
+			return true;
+		}
+	}
+	return false;
+}
+
 ///// DUMB ZOMBIE /////
 
 DumbZombie::DumbZombie(StudentWorld* w, double x, double y)
@@ -902,6 +964,8 @@ void DumbZombie::doSomething()
 	// TODO: BETTER INHERITANCE
 	if (!startDoSomething())
 		return;
+	if (vomit())
+		return;
 	// Check if the zombie needs a new movement plan
 	decideMovementPlan();
 	// move
@@ -911,7 +975,6 @@ void DumbZombie::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
 	world()->increaseScore(1000);
-	// TODO: IMPLEMENT
 }
 
 
@@ -936,6 +999,8 @@ void SmartZombie::doSomething()
 {
 	// TODO: BETTER INHERITANCE
 	if (!startDoSomething())
+		return;
+	if (vomit())
 		return;
 	// Check if the zombie needs a new movement plan
 	decideMovementPlan();
