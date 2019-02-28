@@ -1,7 +1,9 @@
 #include "Actor.h"
 #include "StudentWorld.h"
 
+/////////////////
 ///// ACTOR /////
+/////////////////
 
 Actor::Actor(StudentWorld * w, int imageID, double x, double y, int depth, int dir)
 	:GraphObject(imageID, x, y, dir, depth),
@@ -78,7 +80,9 @@ bool Actor::threatensCitizens() const
 	return false;
 }
 
+////////////////
 ///// WALL /////
+////////////////
 
 Wall::Wall(StudentWorld * w, double x, double y)
 	: Actor(w, IID_WALL, x, y, right, 0)
@@ -100,13 +104,17 @@ bool Wall::blocksFlame() const
 	return true;
 }
 
+///////////////////////////
 //// ACTIVATING OBJECT ////
+///////////////////////////
 
 ActivatingObject::ActivatingObject(StudentWorld* w, int imageID, double x, double y, int depth, int dir)
 	:Actor(w, imageID, x, y, depth, dir)
 {}
 
+////////////////
 ///// EXIT /////
+////////////////
 
 Exit::Exit(StudentWorld* w, double x, double y)
 	: ActivatingObject(w, IID_EXIT, x, y, 1, right)
@@ -130,10 +138,12 @@ void Exit::activateIfAppropriate(Actor* a)
 	{
 		a->useExitIfAppropriate();
 	}
-	return;
 }
 
+////////////////
 //// GOODIE ////
+////////////////
+
 // TODO: Remove Code Repetition
 
 Goodie::Goodie(StudentWorld* w, int imageID, double x, double y)
@@ -150,7 +160,17 @@ void Goodie::dieByFallOrBurnIfAppropriate()
 	setDead();
 }
 
+void Goodie::pickUp(Penelope* p)
+{
+	// Common Goodie pickup functionality
+	world()->increaseScore(50);
+	setDead();
+	world()->playSound(SOUND_GOT_GOODIE);
+}
+
+////////////////////////
 //// VACCINE GOODIE ////
+////////////////////////
 
 VaccineGoodie::VaccineGoodie(StudentWorld* w, double x, double y)
 	: Goodie(w, IID_VACCINE_GOODIE, x, y)
@@ -165,13 +185,13 @@ void VaccineGoodie::doSomething()
 
 void VaccineGoodie::pickUp(Penelope* p)
 {
-	world()->increaseScore(50);
-	setDead();
-	world()->playSound(SOUND_GOT_GOODIE);
+	Goodie::pickUp(p);
 	p->increaseVaccines();
 }
 
+////////////////////////
 //// GAS CAN GOODIE ////
+////////////////////////
 
 GasCanGoodie::GasCanGoodie(StudentWorld* w, double x, double y)
 	: Goodie(w, IID_GAS_CAN_GOODIE, x, y)
@@ -186,13 +206,13 @@ void GasCanGoodie::doSomething()
 
 void GasCanGoodie::pickUp(Penelope* p)
 {
-	world()->increaseScore(50);
-	setDead();
-	world()->playSound(SOUND_GOT_GOODIE);
+	Goodie::pickUp(p);
 	p->increaseFlameCharges();
 }
 
+/////////////////////////
 //// LANDMINE GOODIE ////
+/////////////////////////
 
 LandmineGoodie::LandmineGoodie(StudentWorld* w, double x, double y)
 	: Goodie(w, IID_LANDMINE_GOODIE, x, y)
@@ -207,13 +227,15 @@ void LandmineGoodie::doSomething()
 
 void LandmineGoodie::pickUp(Penelope* p)
 {
-	world()->increaseScore(50);
-	setDead();
-	world()->playSound(SOUND_GOT_GOODIE);
+	Goodie::pickUp(p);
 	p->increaseLandmines();
 }
 
+//////////////////
 //// LANDMINE ////
+//////////////////
+
+// TODO: Merge Landmine, Pit, and Flame doSomething()
 
 Landmine::Landmine(StudentWorld* w, double x, double y)
 	: ActivatingObject(w, IID_LANDMINE, x, y, 1, right),
@@ -228,7 +250,7 @@ void Landmine::doSomething()
 	if (!m_active)
 	{
 		m_safetyTicks--;
-		if (m_safetyTicks == 0)
+		if (m_safetyTicks <= 0)
 		{
 			m_active = true;
 			return;
@@ -288,7 +310,9 @@ void Landmine::dieByFallOrBurnIfAppropriate()
 	explode();
 }
 
+/////////////
 //// PIT ////
+/////////////
 
 Pit::Pit(StudentWorld* w, double x, double y)
 	: ActivatingObject(w, IID_PIT, x, y, 0, right)
@@ -306,7 +330,9 @@ void Pit::activateIfAppropriate(Actor* a)
 		a->dieByFallOrBurnIfAppropriate();
 }
 
+///////////////
 //// FLAME ////
+///////////////
 
 Flame::Flame(StudentWorld* w, double x, double y, int dir)
 	: ActivatingObject(w, IID_FLAME, x, y, 0, dir),
@@ -337,7 +363,9 @@ bool Flame::blocksFlame() const
 	return true;
 }
 
+///////////////
 //// VOMIT ////
+///////////////
 
 Vomit::Vomit(StudentWorld* w, double x, double y, int dir)
 	: ActivatingObject(w, IID_VOMIT, x, y, 0, dir),
@@ -362,8 +390,9 @@ void Vomit::activateIfAppropriate(Actor* a)
 		a->beVomitedOnIfAppropriate();
 }
 
-
+///////////////
 //// AGENT ////
+///////////////
 
 Agent::Agent(StudentWorld* w, int imageID, double x, double y, int dir)
 	:Actor(w, imageID, x, y, 0, dir)
@@ -378,7 +407,9 @@ bool Agent::triggersOnlyActiveLandmines() const
 	return true;
 }
 
+///////////////
 //// HUMAN ////
+///////////////
 
 Human::Human(StudentWorld* w, int imageID, double x, double y)
 	: Agent(w, imageID, x, y, right),
@@ -393,12 +424,10 @@ void Human::beVomitedOnIfAppropriateHelper()
 
 void Human::beVomitedOnIfAppropriate()
 {
-	m_infectionStatus = true;
-	incInfectionDuration();
-	// Play sound if citizen in infected
+	// Play sound if citizen is infected
 	// Don't play a sound if Penelope is infected
 	beVomitedOnIfAppropriateHelper();
-	// TODO: RECORD INFECTION
+	m_infectionStatus = true;
 }
 
 bool Human::triggersZombieVomit() const
@@ -419,12 +448,19 @@ int Human::getInfectionDuration() const
 	return m_infectionCount;
 }
 
+bool Human::getInfectionStatus() const
+{
+	return m_infectionStatus;
+}
+
 void Human::incInfectionDuration()
 {
 	m_infectionCount++;
 }
 
+////////////////////
 ///// PENELOPE /////
+////////////////////
 
 Penelope::Penelope(StudentWorld* w, double x, double y)
 	: Human(w, IID_PLAYER, x, y),
@@ -439,7 +475,7 @@ void Penelope::doSomething()
 	if (isDead())
 		return;
 	// Check if Penelope is infected
-	if (getInfectionDuration() > 0)
+	if (getInfectionStatus())
 		incInfectionDuration();
 	// Check if Penelope is dead
 	if (getInfectionDuration() >= 500)
@@ -447,7 +483,6 @@ void Penelope::doSomething()
 		setDead();
 		world()->playSound(SOUND_PLAYER_DIE);
 		return;
-		// TODO: (The StudentWorld object should then detect that she’s dead and the current level ends)
 	}
 	int ch;
 	if (world()->getKey(ch))
@@ -463,6 +498,7 @@ void Penelope::doSomething()
 				m_flamethrowerCharges--;
 				world()->playSound(SOUND_PLAYER_FIRE);
 				int direction = getDirection();
+				// Chose i to loop from 1 to 3 as this was easier to code
 				for (int i = 1; i < 4; i++)
 				{
 					if (direction == up)
@@ -553,7 +589,6 @@ void Penelope::dieByFallOrBurnIfAppropriate()
 {
 	world()->playSound(SOUND_PLAYER_DIE);
 	setDead();
-	//TODO: IMPLEMENT
 }
 
 
@@ -603,7 +638,9 @@ bool Penelope::triggersCitizens() const
 	return true;
 }
 
+/////////////////
 //// CITIZEN ////
+/////////////////
 
 Citizen::Citizen(StudentWorld* w, double x, double y)
 	: Human(w, IID_CITIZEN, x, y),
@@ -793,7 +830,7 @@ void Citizen::doSomething()
 	// Check if Citizen is dead
 	if (isDead())
 		return;
-	if (getInfectionDuration() > 0)
+	if (getInfectionStatus())
 	{
 		incInfectionDuration();
 		if (getInfectionDuration() >= 500)
@@ -819,16 +856,16 @@ void Citizen::doSomething()
 
 void Citizen::beVomitedOnIfAppropriateHelper()
 {
-	if (getInfectionDuration() <= 1)
+	if (!(getInfectionStatus()))
 		world()->playSound(SOUND_CITIZEN_INFECTED);
 }
 
 void Citizen::useExitIfAppropriate()
 {
 	world()->increaseScore(500);
+	setDead();
 	world()->recordCitizenGone();
 	world()->playSound(SOUND_CITIZEN_SAVED);
-	setDead();
 }
 
 void Citizen::dieByFallOrBurnIfAppropriate()
@@ -839,9 +876,9 @@ void Citizen::dieByFallOrBurnIfAppropriate()
 	world()->increaseScore(-1000);
 }
 
-// TODO: Infect
-
+//////////////////
 ///// ZOMBIE /////
+//////////////////
 
 Zombie::Zombie(StudentWorld* w, double x, double y)
 	: Agent(w, IID_ZOMBIE, x, y, right),
@@ -882,7 +919,6 @@ bool Zombie::startDoSomething()
 	// Check if Zombie is paralized
 	if (getCurrentTick() % 2 == 0)
 		return false;
-	// TODO: Implement Vomit function
 	return true;
 }
 void Zombie::move()
@@ -971,7 +1007,9 @@ bool Zombie::vomit()
 	return false;
 }
 
+///////////////////////
 ///// DUMB ZOMBIE /////
+///////////////////////
 
 // TODO: DUMB ZOMBIES DROP VACCINES SOMETIMES
 
@@ -1010,7 +1048,9 @@ void DumbZombie::decideMovementPlan()
 	}
 }
 
+////////////////////////
 ///// SMART ZOMBIE /////
+////////////////////////
 
 SmartZombie::SmartZombie(StudentWorld* w, double x, double y)
 	: Zombie(w, x, y)
@@ -1106,3 +1146,5 @@ void SmartZombie::decideMovementPlan()
 
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////////////

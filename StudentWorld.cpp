@@ -15,7 +15,6 @@ and if no other object in the game would overlap with an object created at those
 introduces a new vaccine goodie at those coordinates; otherwise, it does not introduce a vaccine object.
 
 Vomit is not blocked by an exit.
-
 */
 
 double euclidianDistance(Actor* A, Actor* B)
@@ -47,7 +46,6 @@ StudentWorld::StudentWorld(string assetPath)
 	m_pen = nullptr;
 }
 
-// TODO: Winning the game destructs twice
 StudentWorld::~StudentWorld()
 {
 	cleanUp();

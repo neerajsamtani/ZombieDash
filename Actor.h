@@ -37,7 +37,7 @@ public:
 	virtual void dieByFallOrBurnIfAppropriate();
 
 	// If this object can be infected by vomit, get infected.
-	virtual void beVomitedOnIfAppropriate(); // TODO
+	virtual void beVomitedOnIfAppropriate();
 
 	// If this object can pick up goodies, pick up g
 	virtual void pickUpGoodieIfAppropriate(Goodie* g);
@@ -186,6 +186,7 @@ public:
 
 	// How many ticks since this human was infected by vomit?
 	int getInfectionDuration() const;
+	bool getInfectionStatus() const;
 	void incInfectionDuration();
 
 private:
