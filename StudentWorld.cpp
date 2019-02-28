@@ -8,11 +8,7 @@ using namespace std;
 /*
 TODO
 
-When a dumb zombie drops a vaccine goodie, it does not simply drop it at its own (x,y) coordinates, 
-but tries to fling it away instead: It chooses a random direction, computes the coordinates 
-SPRITE_WIDTH units away if the direction is left or right or SPRITE_HEIGHT units away if it is up or down, 
-and if no other object in the game would overlap with an object created at those coordinates, 
-introduces a new vaccine goodie at those coordinates; otherwise, it does not introduce a vaccine object.
+is_____BlockedAt requires a common function
 
 Vomit is not blocked by an exit.
 */
@@ -335,6 +331,74 @@ bool StudentWorld::isFlameBlockedAt(Actor* curActor, double x, double y)
 	return false;
 }
 
+bool StudentWorld::isVaccineBlockedAt(Actor* curActor, double x, double y)
+{
+	// Create bounding box for destination
+	double dest_x_start = x;
+	double dest_x_end = (x + SPRITE_WIDTH - 1);
+	double dest_y_start = y;
+	double dest_y_end = (y + SPRITE_HEIGHT - 1);
+
+	// Check if the destination x and y coordinates are in Penelope's bounding box
+	if (curActor != m_pen)
+	{
+		// Create bounding box for current actor
+		double pen_x_start = m_pen->getX();
+		double pen_x_end = (m_pen->getX() + SPRITE_WIDTH - 1);
+		double pen_y_start = m_pen->getY();
+		double pen_y_end = (m_pen->getY() + SPRITE_HEIGHT - 1);
+
+		// Check if the bouding boxes overlap
+		if ((pen_x_start <= dest_x_start && dest_x_start <= pen_x_end &&
+			pen_y_start <= dest_y_start && dest_y_start <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_end && dest_x_end <= pen_x_end &&
+				pen_y_start <= dest_y_end && dest_y_end <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_start && dest_x_start <= pen_x_end &&
+				pen_y_start <= dest_y_end && dest_y_end <= pen_y_end)
+			||
+			(pen_x_start <= dest_x_end && dest_x_end <= pen_x_end &&
+				pen_y_start <= dest_y_start && dest_y_start <= pen_y_end)
+			)
+		{
+			return true;
+		}
+	}
+
+	// Check if the destination x and y coordinates are in any other actor's bounding box
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		if (*p == curActor)
+			continue;
+		// Vaccines are blocked by all other actors
+		// Create bounding box for current actor
+		double actor_x_start = (*p)->getX();
+		double actor_x_end = ((*p)->getX() + SPRITE_WIDTH - 1);
+		double actor_y_start = (*p)->getY();
+		double actor_y_end = ((*p)->getY() + SPRITE_HEIGHT - 1);
+
+		// Check if the bouding boxes overlap
+		if ((actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+			actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+			||
+			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+				actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+			||
+			(actor_x_start <= dest_x_start && dest_x_start <= actor_x_end &&
+				actor_y_start <= dest_y_end && dest_y_end <= actor_y_end)
+			||
+			(actor_x_start <= dest_x_end && dest_x_end <= actor_x_end &&
+				actor_y_start <= dest_y_start && dest_y_start <= actor_y_end)
+			)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool StudentWorld::isZombieVomitTriggerAt(Actor* curActor, double x, double y)
 {
 	// Check if the distance between Penelope and the x and y coordinates
@@ -412,7 +476,7 @@ bool StudentWorld::locateNearestCitizenTrigger(Actor* curActor, double& otherX, 
 {
 	// Select closest person
 	// Assume Penelope is the closest
-	if (!m_pen->isDead())
+	if (!(m_pen->isDead()))
 	{
 		double minDistance = euclidianDistance(curActor, m_pen);
 		Actor* closestActor = m_pen;
@@ -423,7 +487,7 @@ bool StudentWorld::locateNearestCitizenTrigger(Actor* curActor, double& otherX, 
 			// Check if the character triggers citizens and is alive
 			if ((*p)->triggersCitizens() && !((*p)->isDead()))
 			{
-				double tempDistance = euclidianDistance(curActor, *p);
+				double tempDistance = euclidianDistance(curActor, (*p));
 				if (tempDistance < minDistance)
 				{
 					minDistance = tempDistance;

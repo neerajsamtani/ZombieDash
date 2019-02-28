@@ -6,7 +6,6 @@
 
 class Goodie;
 class Penelope;
-
 class StudentWorld;
 
 class Actor : public GraphObject

@@ -735,7 +735,7 @@ void Citizen::decideMovementPlan()
 			}
 		}
 	}
-	else if(isThreat && distance <= (80*80))
+	if (isThreat && distance <= (80*80))
 	{
 		// The direction is chosen to be one that would cause the
 		// citizen to get further from the zombie
@@ -919,7 +919,8 @@ bool Zombie::startDoSomething()
 	// Check if Zombie is paralized
 	if (getCurrentTick() % 2 == 0)
 		return false;
-	return true;
+	else
+		return true;
 }
 void Zombie::move()
 {
@@ -1034,6 +1035,34 @@ void DumbZombie::dieByFallOrBurnIfAppropriate()
 	setDead();
 	world()->playSound(SOUND_ZOMBIE_DIE);
 	world()->increaseScore(1000);
+	// Attempt to drop Vaccine
+	int randomInteger = randInt(1, 10);
+	// 1 in 10 Dumb Zombies has a vaccine
+	if (randomInteger == 1)
+	{
+		int DIRS[] = { up, down, left, right };
+		int direction = DIRS[randInt(0, 3)];
+		double dest_x = getX();
+		double dest_y = getY();
+		switch (direction)
+		{
+		case left:
+			dest_x -= SPRITE_WIDTH;
+			break;
+		case right:
+			dest_x += SPRITE_WIDTH;
+			break;
+		case up:
+			dest_y += SPRITE_HEIGHT;
+			break;
+		case down:
+			dest_y -= SPRITE_HEIGHT;
+			break;
+		}
+		if (!world()->isVaccineBlockedAt(this, dest_x, dest_y))
+			world()->addActor(new VaccineGoodie(world(), dest_x, dest_y));
+		// Sometimes, the vaccine get immediately destroyed by the flames in the air
+	}
 }
 
 
@@ -1071,6 +1100,7 @@ void SmartZombie::doSomething()
 void SmartZombie::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
+	world()->playSound(SOUND_ZOMBIE_DIE);
 	world()->increaseScore(2000);
 }
 
@@ -1088,7 +1118,7 @@ void SmartZombie::decideMovementPlan()
 		double other_y = getY();
 		double distance = 0;
 
-		if (world()->locateNearestVomitTrigger(this, other_x, other_y, distance))
+		if (world()->locateNearestVomitTrigger(this, other_x, other_y, distance) && distance <= (80*80))
 		{
 			// The direction is chosen to be one that would cause the
 			// zombie to get closer to the person
