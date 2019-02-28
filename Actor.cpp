@@ -119,9 +119,9 @@ bool Exit::blocksFlame() const
 
 void Exit::doSomething()
 {
+	world()->activateOnAppropriateActors(this);
 	// TODO: Determine overlap with person
 	// TODO: check if all citizens have exited
-	world()->activateOnAppropriateActors(this);
 }
 
 void Exit::activateIfAppropriate(Actor* a)
@@ -168,7 +168,6 @@ void VaccineGoodie::doSomething()
 void VaccineGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	cerr << "VACCINE ACQUIRED" << endl;
 	this->setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseVaccines();
@@ -190,7 +189,6 @@ void GasCanGoodie::doSomething()
 void GasCanGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	cerr << "GAS CAN ACQUIRED" << endl;
 	this->setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseFlameCharges();
@@ -518,8 +516,12 @@ void Penelope::doSomething()
 void Penelope::useExitIfAppropriate()
 {
 	// TODO: Check
-	world()->setLevelFinished();
-	world()->playSound(SOUND_LEVEL_FINISHED);
+	if (world()->canExit())
+	{
+		cout << "canExit value: " << world()->canExit() << endl;
+		world()->setLevelFinished();
+		world()->playSound(SOUND_LEVEL_FINISHED);
+	}
 }
 
 void Penelope::dieByFallOrBurnIfAppropriate()
@@ -602,13 +604,15 @@ void Citizen::decideMovementPlan()
 	double other_x = getX();
 	double other_y = getY();
 	double distance = 0;
+	bool isThreat = false;
+	world()->locateNearestCitizenTrigger(this, other_x, other_y, distance, isThreat);
 
-	if (world()->locateNearestVomitTrigger(this, other_x, other_y, distance))
+	if (!isThreat)
 	{
 		// The direction is chosen to be one that would cause the
-		// zombie to get closer to the person
-		// If the zombie is on the same row or column as the person,
-		// choose the(only) direction that gets the zombie closer
+		// citizen to get closer to Penelope
+		// If the citizen is on the same row or column as Penelope,
+		// choose the(only) direction that gets the citizen closer
 		if (other_x == getX())
 		{
 			if (other_y > getY())
@@ -629,7 +633,7 @@ void Citizen::decideMovementPlan()
 		}
 		else
 			// Otherwise, choose randomly between the two directions
-			// (one horizontal and one vertical) that get the zombie closer
+			// (one horizontal and one vertical) that get the citizen closer
 		{
 			// Set possible directions
 			int possibleDirs[2];
@@ -724,12 +728,14 @@ void Citizen::doSomething()
 void Citizen::useExitIfAppropriate()
 {
 	// Don't decrease score
+	world()->recordCitizenGone();
 	setDead();
 }
 
 void Citizen::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
+	world()->recordCitizenGone();
 	world()->playSound(SOUND_CITIZEN_DIE);
 	world()->increaseScore(-1000);
 }

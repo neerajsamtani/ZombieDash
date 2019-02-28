@@ -36,8 +36,11 @@ int StudentWorld::init()
 {
 	// LESSON: Only constructors can use intializer lists.
 	// TODO: Remove cerr
-	Level lev(assetPath());
+	m_numCitizens = 0;
+	m_canExit = false;
 	m_levelFinished = false;
+
+	Level lev(assetPath());
 	ostringstream oss;
 	oss << "level0" << getLevel() << ".txt";
 	string levelFile = oss.str();
@@ -64,6 +67,7 @@ int StudentWorld::init()
 					break;
 				case Level::citizen:
 					cnt++;
+					m_numCitizens++;
 					addActor(new Citizen(this, x, y));
 					break;
 				case Level::vaccine_goodie:
@@ -103,6 +107,7 @@ int StudentWorld::init()
 				}
 			}
 		}
+		recordLevelFinishedIfAllCitizensGone();
 		cerr << "Created " << cnt << " actors" << endl;
 		cerr << "Size of list " << actors.size() << endl;
 		return GWSTATUS_CONTINUE_GAME;
@@ -162,6 +167,7 @@ int StudentWorld::move()
 void StudentWorld::cleanUp()
 {
 	// TODO: Remove cerr lines
+
 	cerr << "Ending Level " << getLevel()-1 << endl;
 	if (m_pen != nullptr) // TODO: Is this check necessary?
 	{
@@ -422,7 +428,7 @@ bool StudentWorld::locateNearestCitizenTrigger(Actor* curActor, double& otherX, 
 		otherX = closestActor->getX();
 		otherY = closestActor->getY();
 		distance = minDistance;
-		isThreat = closestActor->triggersCitizens();
+		isThreat = closestActor->threatensCitizens();
 		return true;
 	}
 	else
@@ -447,4 +453,21 @@ void StudentWorld::setLevelFinished()
 bool StudentWorld::getLevelFinished()
 {
 	return m_levelFinished;
+}
+
+void StudentWorld::recordLevelFinishedIfAllCitizensGone()
+{
+	if (m_numCitizens <= 0)
+		m_canExit = true;
+}
+
+void StudentWorld::recordCitizenGone()
+{
+	m_numCitizens--;
+	recordLevelFinishedIfAllCitizensGone();
+}
+
+bool StudentWorld::canExit()
+{
+	return m_canExit;
 }

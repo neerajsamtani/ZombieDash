@@ -14,24 +14,6 @@ class Penelope;
 class StudentWorld : public GameWorld
 {
 public:
-	/*
-
-	// Record that one more citizen on the current level is gone (exited,
-	// died, or turned into a zombie).
-	void recordCitizenGone();
-
-	// Indicate that the player has finished the level if all citizens
-	// are gone.
-	void recordLevelFinishedIfAllCitizensGone();
-
-	// Return true if there is a living zombie, false otherwise.  If true,
-	// otherX, otherY and distance will be set to the location and distance
-	// of the one nearest to (x,y).
-	bool locateNearestCitizenThreat(double x, double y, double& otherX, double& otherY, double& distance) const;
-
-	*/
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     StudentWorld(std::string assetPath);
 	virtual ~StudentWorld();
@@ -68,16 +50,37 @@ public:
 	// if it's a zombie, false if a Penelope.
 	bool locateNearestCitizenTrigger(Actor* curActor, double& otherX, double& otherY, double& distance, bool& isThreat);
 
+	// Record that one more citizen on the current level is gone (exited,
+	// died, or turned into a zombie).
+	void recordCitizenGone();
+
+	// Indicate that the player has finished the level if all citizens
+	// are gone.
+	void recordLevelFinishedIfAllCitizensGone();
+
+	/*
+
+	// Return true if there is a living zombie, false otherwise.  If true,
+	// otherX, otherY and distance will be set to the location and distance
+	// of the one nearest to (x,y).
+	bool locateNearestCitizenThreat(double x, double y, double& otherX, double& otherY, double& distance) const;
+
+	*/
+
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);
 
 	void setLevelFinished();
 	bool getLevelFinished();
 
+	bool canExit();
+
 private:
 	Penelope *m_pen;
 	list<Actor*> actors;
 	bool m_levelFinished;
+	bool m_canExit;
+	int m_numCitizens;
 };
 
 #endif // STUDENTWORLD_H_
