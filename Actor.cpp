@@ -166,7 +166,7 @@ void VaccineGoodie::doSomething()
 void VaccineGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	this->setDead();
+	setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseVaccines();
 }
@@ -187,7 +187,7 @@ void GasCanGoodie::doSomething()
 void GasCanGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	this->setDead();
+	setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseFlameCharges();
 }
@@ -208,7 +208,7 @@ void LandmineGoodie::doSomething()
 void LandmineGoodie::pickUp(Penelope* p)
 {
 	world()->increaseScore(50);
-	this->setDead();
+	setDead();
 	world()->playSound(SOUND_GOT_GOODIE);
 	p->increaseLandmines();
 }
@@ -320,7 +320,8 @@ void Flame::doSomething()
 	m_ticksLeft--;
 	if (m_ticksLeft <= 0)
 		setDead();
-	world()->activateOnAppropriateActors(this);
+	else
+		world()->activateOnAppropriateActors(this);
 }
 
 void Flame::activateIfAppropriate(Actor* a)
@@ -345,24 +346,19 @@ Vomit::Vomit(StudentWorld* w, double x, double y, int dir)
 
 void Vomit::doSomething()
 {
-	if (!isDead())
-	{
-		m_ticksLeft--;
-		//cerr << "Tick" << endl;
-		if (m_ticksLeft <= 0)
-		{
-			setDead();
-			cerr << "Dead" << endl;
-		}
-		else
-			world()->activateOnAppropriateActors(this);
-	}
+	if (isDead())
+		return;
+	m_ticksLeft--;
+	if (m_ticksLeft <= 0)
+		setDead();
+	else
+		world()->activateOnAppropriateActors(this);
 }
 
 void Vomit::activateIfAppropriate(Actor* a)
 {
 	// Vomit shouldn't try to infect a dead object
-	if (!(a->isDead()) && a->triggersZombieVomit())
+	if (!(a->isDead()))
 		a->beVomitedOnIfAppropriate();
 }
 
@@ -914,40 +910,45 @@ bool Zombie::threatensCitizens() const
 bool Zombie::vomit()
 {
 	int direction = getDirection();
-	if (direction == up)
+	int randomInteger = randInt(1, 3);
+	// There is a one in three chance that the zombie will vomit
+	if (randomInteger == 1)
 	{
-		if (world()->isZombieVomitTriggerAt(this, getX(), getY() + SPRITE_HEIGHT))
+		if (direction == up)
 		{
-			world()->addActor(new Vomit(world(), getX(), getY() + SPRITE_HEIGHT, getDirection()));
-			world()->playSound(SOUND_ZOMBIE_VOMIT);
-			return true;
+			if (world()->isZombieVomitTriggerAt(this, getX(), getY() + SPRITE_HEIGHT))
+			{
+				world()->addActor(new Vomit(world(), getX(), getY() + SPRITE_HEIGHT, getDirection()));
+				world()->playSound(SOUND_ZOMBIE_VOMIT);
+				return true;
+			}
 		}
-	}
-	else if (direction == down)
-	{
-		if (world()->isZombieVomitTriggerAt(this, getX(), getY() - SPRITE_HEIGHT))
+		else if (direction == down)
 		{
-			world()->addActor(new Vomit(world(), getX(), getY() - SPRITE_HEIGHT, getDirection()));
-			world()->playSound(SOUND_ZOMBIE_VOMIT);
-			return true;
+			if (world()->isZombieVomitTriggerAt(this, getX(), getY() - SPRITE_HEIGHT))
+			{
+				world()->addActor(new Vomit(world(), getX(), getY() - SPRITE_HEIGHT, getDirection()));
+				world()->playSound(SOUND_ZOMBIE_VOMIT);
+				return true;
+			}
 		}
-	}
-	else if (direction == left)
-	{
-		if (world()->isZombieVomitTriggerAt(this, getX() - SPRITE_WIDTH, getY()))
+		else if (direction == left)
 		{
-			world()->addActor(new Vomit(world(), getX() - SPRITE_WIDTH, getY(), getDirection()));
-			world()->playSound(SOUND_ZOMBIE_VOMIT);
-			return true;
+			if (world()->isZombieVomitTriggerAt(this, getX() - SPRITE_WIDTH, getY()))
+			{
+				world()->addActor(new Vomit(world(), getX() - SPRITE_WIDTH, getY(), getDirection()));
+				world()->playSound(SOUND_ZOMBIE_VOMIT);
+				return true;
+			}
 		}
-	}
-	else if (direction == right)
-	{
-		if (world()->isZombieVomitTriggerAt(this, getX() + SPRITE_WIDTH, getY()))
+		else if (direction == right)
 		{
-			world()->addActor(new Vomit(world(), getX() + SPRITE_WIDTH, getY(), getDirection()));
-			world()->playSound(SOUND_ZOMBIE_VOMIT);
-			return true;
+			if (world()->isZombieVomitTriggerAt(this, getX() + SPRITE_WIDTH, getY()))
+			{
+				world()->addActor(new Vomit(world(), getX() + SPRITE_WIDTH, getY(), getDirection()));
+				world()->playSound(SOUND_ZOMBIE_VOMIT);
+				return true;
+			}
 		}
 	}
 	return false;
