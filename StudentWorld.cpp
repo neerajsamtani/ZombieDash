@@ -396,6 +396,41 @@ bool StudentWorld::locateNearestVomitTrigger(Actor* curActor, double& otherX, do
 
 }
 
+bool StudentWorld::locateNearestCitizenTrigger(Actor* curActor, double& otherX, double& otherY, double& distance, bool& isThreat)
+{
+	// Select closest person
+	// Assume Penelope is the closest
+	if (!m_pen->isDead())
+	{
+		double minDistance = euclidianDistance(curActor, m_pen);
+		Actor* closestActor = m_pen;
+		// Check if other actors are closer
+		for (list<Actor*>::iterator p = actors.begin();
+			p != actors.end(); p++)
+		{
+			// Check if the character triggers citizens and is alive
+			if ((*p)->triggersCitizens() && !((*p)->isDead()))
+			{
+				double tempDistance = euclidianDistance(curActor, *p);
+				if (tempDistance < minDistance)
+				{
+					minDistance = tempDistance;
+					closestActor = *p;
+				}
+			}
+		}
+		otherX = closestActor->getX();
+		otherY = closestActor->getY();
+		distance = minDistance;
+		isThreat = closestActor->triggersCitizens();
+		return true;
+	}
+	else
+		// If Penelope is dead, the level ends and this function will not be called
+		return false;
+
+}
+
 bool StudentWorld::objectOverlap(Actor* A, Actor* B)
 {
 	if (euclidianDistance(A, B) <= 100)

@@ -68,6 +68,16 @@ void Actor::pickUpGoodieIfAppropriate(Goodie* g)
 	return;
 }
 
+bool Actor::triggersCitizens() const
+{
+	return false;
+}
+
+bool Actor::threatensCitizens() const
+{
+	return false;
+}
+
 ///// WALL /////
 
 Wall::Wall(StudentWorld * w, double x, double y)
@@ -560,13 +570,17 @@ int Penelope::getNumLandmines() const
 	return m_landmines;
 }
 
+bool Penelope::triggersCitizens() const
+{
+	return true;
+}
+
 //// CITIZEN ////
 
 Citizen::Citizen(StudentWorld* w, double x, double y)
 	: Human(w, IID_CITIZEN, x, y),
 	m_infectionStatus(false),
 	m_infectionCount(0),
-	m_movementPlanDistance(0), 
 	m_currentTick(0)
 {}
 
@@ -579,18 +593,100 @@ void Citizen::nextTick()
 	m_currentTick++;
 }
 
-int  Citizen::getMovementPlanDistance()
+void Citizen::decideMovementPlan()
 {
-	return m_movementPlanDistance;
+	// Create directions array
+	int DIRS[] = { up, down, left, right };
+
+	// Pointless initial values. Will be changed during function call.
+	double other_x = getX();
+	double other_y = getY();
+	double distance = 0;
+
+	if (world()->locateNearestVomitTrigger(this, other_x, other_y, distance))
+	{
+		// The direction is chosen to be one that would cause the
+		// zombie to get closer to the person
+		// If the zombie is on the same row or column as the person,
+		// choose the(only) direction that gets the zombie closer
+		if (other_x == getX())
+		{
+			if (other_y > getY())
+			{
+				setDirection(up);
+			}
+			else
+				setDirection(down);
+		}
+		else if (other_y == getY())
+		{
+			if (other_x > getX())
+			{
+				setDirection(right);
+			}
+			else
+				setDirection(left);
+		}
+		else
+			// Otherwise, choose randomly between the two directions
+			// (one horizontal and one vertical) that get the zombie closer
+		{
+			// Set possible directions
+			int possibleDirs[2];
+			if (other_x > getX())
+			{
+				possibleDirs[0] = right;
+				if (other_y > getY())
+					possibleDirs[1] = up;
+				else
+					possibleDirs[1] = down;
+			}
+			else
+			{
+				possibleDirs[0] = left;
+				if (other_y > getY())
+					possibleDirs[1] = up;
+				else
+					possibleDirs[1] = down;
+			}
+			setDirection(possibleDirs[randInt(0, 1)]);
+		}
+	}
+	else
+	{
+		// If the distance to the selected nearest person is more than 80 pixels
+		// away, the direction is randomly chosen from up, down, left, and right.
+		setDirection(DIRS[randInt(0, 3)]);
+	}
 }
-void Citizen::setMovementPlanDistance(int x)
+
+void Citizen::move()
 {
-	m_movementPlanDistance = x;
+	// Attempt to move citizen in a certain direction
+	// Zombies move by one pixel, Citizens move by two
+	double dest_x = getX();
+	double dest_y = getY();
+	switch (getDirection())
+	{
+	case left:
+		dest_x -= 2;
+		break;
+	case right:
+		dest_x += 2;
+		break;
+	case up:
+		dest_y += 2;
+		break;
+	case down:
+		dest_y -= 2;
+		break;
+	}
+	if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+	{
+		moveTo(dest_x, dest_y);
+	}
 }
-void Citizen::decMovementPlanDistance()
-{
-	m_movementPlanDistance--;
-}
+
 
 void Citizen::doSomething()
 {
@@ -621,13 +717,16 @@ void Citizen::doSomething()
 	// Check if Citizen is paralized
 	if (getCurrentTick() % 2 == 0)
 		return;
-	// TODO: Move
+	decideMovementPlan();
+	move();
 }
+
 void Citizen::useExitIfAppropriate()
 {
 	// Don't decrease score
 	setDead();
 }
+
 void Citizen::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
@@ -688,7 +787,6 @@ void Zombie::move()
 	double dest_y = getY();
 	switch (getDirection())
 	{
-		// TODO: Check if one pixel is one in this code
 	case left:
 		dest_x -= 1;
 		break;
@@ -711,6 +809,15 @@ void Zombie::move()
 		setMovementPlanDistance(0);
 }
 
+bool Zombie::triggersCitizens() const
+{
+	return true;
+}
+
+bool Zombie::threatensCitizens() const
+{
+	return true;
+}
 
 ///// DUMB ZOMBIE /////
 

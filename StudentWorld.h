@@ -24,12 +24,6 @@ public:
 	// are gone.
 	void recordLevelFinishedIfAllCitizensGone();
 
-	// Return true if there is a living zombie or Penelope, otherwise false.
-	// If true, otherX, otherY, and distance will be set to the location and
-	// distance of the one nearest to (x,y), and isThreat will be set to true
-	// if it's a zombie, false if a Penelope.
-	bool locateNearestCitizenTrigger(double x, double y, double& otherX, double& otherY, double& distance, bool& isThreat) const;
-
 	// Return true if there is a living zombie, false otherwise.  If true,
 	// otherX, otherY and distance will be set to the location and distance
 	// of the one nearest to (x,y).
@@ -67,6 +61,12 @@ public:
 	// otherX, otherY, and distance will be set to the location and distance
 	// of the human nearest to (x,y).
 	bool locateNearestVomitTrigger(Actor* curActor, double& otherX, double& otherY, double& distance);
+
+	// Return true if there is a living zombie or Penelope, otherwise false.
+	// If true, otherX, otherY, and distance will be set to the location and
+	// distance of the one nearest to (x,y), and isThreat will be set to true
+	// if it's a zombie, false if a Penelope.
+	bool locateNearestCitizenTrigger(Actor* curActor, double& otherX, double& otherY, double& distance, bool& isThreat);
 
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);

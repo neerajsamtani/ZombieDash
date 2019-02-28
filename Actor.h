@@ -58,10 +58,10 @@ public:
 	virtual bool triggersZombieVomit() const;
 
 	// Is this object a threat to citizens?
-	//virtual bool threatensCitizens() const;
+	virtual bool threatensCitizens() const;
 
 	// Does this object trigger citizens to follow it or flee it?
-	//virtual bool triggersCitizens() const;
+	virtual bool triggersCitizens() const;
 
 private:
 	bool m_isDead;
@@ -229,6 +229,9 @@ public:
 	// If this object can pick up goodies, pick up g
 	virtual void pickUpGoodieIfAppropriate(Goodie* g);
 
+	// Does this object trigger citizens to follow it or flee it?
+	virtual bool triggersCitizens() const;
+
 private:
 	int m_landmines;
 	int m_flamethrowerCharges;
@@ -236,6 +239,8 @@ private:
 	int m_infectionCount;
 	bool m_infectionStatus;
 };
+
+// TODO: MERGE CITIZEN MOVE AND ZOMBIE MOVE
 
 class Citizen : public Human
 {
@@ -245,18 +250,14 @@ public:
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
 
-	// TODO: change movementPlanDistance from int to double
-
-	int  getMovementPlanDistance();
-	void setMovementPlanDistance(int x);
-	void decMovementPlanDistance();
+	void decideMovementPlan();
+	void move();
 
 private:
 
 	int  getCurrentTick();
 	void nextTick();
 
-	int m_movementPlanDistance;
 	int m_currentTick;
 	bool m_infectionStatus;
 	int m_infectionCount;
@@ -275,6 +276,12 @@ public:
 	int  getMovementPlanDistance();
 	void setMovementPlanDistance(int x);
 	void decMovementPlanDistance();
+
+	// Is this object a threat to citizens?
+	virtual bool threatensCitizens() const;
+
+	// Does this object trigger citizens to follow it or flee it?
+	virtual bool triggersCitizens() const;
 
 private:
 
