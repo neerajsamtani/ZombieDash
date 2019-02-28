@@ -58,14 +58,10 @@ public:
 	// are gone.
 	void recordLevelFinishedIfAllCitizensGone();
 
-	/*
-
 	// Return true if there is a living zombie, false otherwise.  If true,
 	// otherX, otherY and distance will be set to the location and distance
 	// of the one nearest to (x,y).
-	bool locateNearestCitizenThreat(double x, double y, double& otherX, double& otherY, double& distance) const;
-
-	*/
+	bool locateNearestCitizenThreat(double x, double y, double& otherX, double& otherY, double& distance);
 
 	// Determines objectOverlap
 	bool objectOverlap(Actor* A, Actor* B);

@@ -251,7 +251,7 @@ public:
 	virtual void dieByFallOrBurnIfAppropriate();
 
 	void decideMovementPlan();
-	void move();
+	bool move();
 
 private:
 

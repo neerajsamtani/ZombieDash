@@ -15,6 +15,16 @@ double euclidianDistance(Actor* A, Actor* B)
 	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
 }
 
+double euclidianDistance(double x, double y, Actor* B)
+{
+	// TODO: Double check the following note
+	// Note that distance between centers is equal to distance between corners
+	double deltaX = (x) - (B->getX());
+	double deltaY = (y) - (B->getY());
+
+	return ((deltaX)*(deltaX)) + ((deltaY)*(deltaY));
+}
+
 GameWorld* createStudentWorld(string assetPath)
 {
 	return new StudentWorld(assetPath);
@@ -435,6 +445,42 @@ bool StudentWorld::locateNearestCitizenTrigger(Actor* curActor, double& otherX, 
 		// If Penelope is dead, the level ends and this function will not be called
 		return false;
 
+}
+
+bool StudentWorld::locateNearestCitizenThreat(double x, double y, double& otherX, double& otherY, double& distance)
+{
+	// Select closest person
+	double minDistance;
+	Actor* closestActor = nullptr;
+	// Check if other actors are closer
+	for (list<Actor*>::iterator p = actors.begin();
+		p != actors.end(); p++)
+	{
+		// Check if the character triggers citizens and is alive
+		if (closestActor == nullptr && (*p)->threatensCitizens() && !((*p)->isDead()))
+		{
+			closestActor = *p;
+			minDistance = euclidianDistance(x, y, *p);
+		}
+		else if ((*p)->threatensCitizens() && !((*p)->isDead()))
+		{
+			double tempDistance = euclidianDistance(x, y, *p);
+			if (tempDistance < minDistance)
+			{
+				minDistance = tempDistance;
+				closestActor = *p;
+			}
+		}
+	}
+	if (closestActor != nullptr)
+	{
+		otherX = closestActor->getX();
+		otherY = closestActor->getY();
+		distance = minDistance;
+		return true;
+	}
+	else
+		return false;
 }
 
 bool StudentWorld::objectOverlap(Actor* A, Actor* B)
