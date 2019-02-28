@@ -386,10 +386,18 @@ Human::Human(StudentWorld* w, int imageID, double x, double y)
 	m_infectionCount(0)
 {}
 
+void Human::beVomitedOnIfAppropriateHelper()
+{
+	return;
+}
+
 void Human::beVomitedOnIfAppropriate()
 {
 	m_infectionStatus = true;
 	incInfectionDuration();
+	// Play sound if citizen in infected
+	// Don't play a sound if Penelope is infected
+	beVomitedOnIfAppropriateHelper();
 	// TODO: RECORD INFECTION
 }
 
@@ -543,6 +551,7 @@ void Penelope::useExitIfAppropriate()
 
 void Penelope::dieByFallOrBurnIfAppropriate()
 {
+	world()->playSound(SOUND_PLAYER_DIE);
 	setDead();
 	//TODO: IMPLEMENT
 }
@@ -612,6 +621,9 @@ void Citizen::nextTick()
 
 void Citizen::decideMovementPlan()
 {
+	// TODO: CITIZEN SHOULD REMAIN STILL UNLESS CLOSE TO PENELOPE OR ZOMBIE
+	// I think that the distance threshold is set too high
+
 	// Create directions array
 	int DIRS[] = { up, down, left, right };
 
@@ -786,10 +798,7 @@ void Citizen::doSomething()
 		incInfectionDuration();
 		if (getInfectionDuration() >= 500)
 		{
-			setDead();
-			world()->recordCitizenGone();
-			world()->playSound(SOUND_ZOMBIE_BORN);
-			world()->increaseScore(-1000);
+			dieByFallOrBurnIfAppropriate();
 			int n = randInt(1, 10);
 			// 30% chance of smart zombie
 			if (1 <= n && n <= 3)
@@ -798,6 +807,7 @@ void Citizen::doSomething()
 			}
 			else
 				world()->addActor(new DumbZombie(world(), getX(), getY()));
+			world()->playSound(SOUND_ZOMBIE_BORN);
 			return;
 		}
 	}
@@ -807,10 +817,17 @@ void Citizen::doSomething()
 	decideMovementPlan();
 }
 
+void Citizen::beVomitedOnIfAppropriateHelper()
+{
+	if (getInfectionDuration() <= 1)
+		world()->playSound(SOUND_CITIZEN_INFECTED);
+}
+
 void Citizen::useExitIfAppropriate()
 {
-	// Don't decrease score
+	world()->increaseScore(500);
 	world()->recordCitizenGone();
+	world()->playSound(SOUND_CITIZEN_SAVED);
 	setDead();
 }
 
@@ -956,6 +973,8 @@ bool Zombie::vomit()
 
 ///// DUMB ZOMBIE /////
 
+// TODO: DUMB ZOMBIES DROP VACCINES SOMETIMES
+
 DumbZombie::DumbZombie(StudentWorld* w, double x, double y)
 	: Zombie(w, x, y)
 {}
@@ -975,6 +994,7 @@ void DumbZombie::doSomething()
 void DumbZombie::dieByFallOrBurnIfAppropriate()
 {
 	setDead();
+	world()->playSound(SOUND_ZOMBIE_DIE);
 	world()->increaseScore(1000);
 }
 

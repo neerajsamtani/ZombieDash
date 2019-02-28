@@ -5,6 +5,19 @@
 #include <iomanip>
 using namespace std;
 
+/*
+TODO
+
+When a dumb zombie drops a vaccine goodie, it does not simply drop it at its own (x,y) coordinates, 
+but tries to fling it away instead: It chooses a random direction, computes the coordinates 
+SPRITE_WIDTH units away if the direction is left or right or SPRITE_HEIGHT units away if it is up or down, 
+and if no other object in the game would overlap with an object created at those coordinates, 
+introduces a new vaccine goodie at those coordinates; otherwise, it does not introduce a vaccine object.
+
+Vomit is not blocked by an exit.
+
+*/
+
 double euclidianDistance(Actor* A, Actor* B)
 {
 	// Note that distance between centers is equal to distance between corners
@@ -42,7 +55,6 @@ StudentWorld::~StudentWorld()
 
 int StudentWorld::init()
 {
-	// LESSON: Only constructors can use intializer lists.
 	// TODO: Remove cerr
 	m_numCitizens = 0;
 	m_canExit = false;
@@ -50,6 +62,8 @@ int StudentWorld::init()
 
 	Level lev(assetPath());
 	ostringstream oss;
+	if (getLevel() == 100)
+		return GWSTATUS_PLAYER_WON;
 	oss << "level0" << getLevel() << ".txt";
 	string levelFile = oss.str();
 
@@ -57,7 +71,10 @@ int StudentWorld::init()
 	if (result == Level::load_fail_file_not_found)
 		cerr << "Cannot find " << "level0" << getLevel() << ".txt data file" << endl;
 	else if (result == Level::load_fail_bad_format)
-		cerr << "Your level was improperly formatted" << endl; // TODO: CHECK IF LEVEL IS SURROUNDED BY WALLS
+	{
+		cerr << "Your level was improperly formatted" << endl;
+		return GWSTATUS_LEVEL_ERROR;
+	}
 	else if (result == Level::load_success)
 	{
 		cerr << "Successfully loaded " << "level0" << getLevel() << ".txt" << endl;
@@ -110,6 +127,8 @@ int StudentWorld::init()
 					addActor(new Wall(this, x, y));
 					break;
 				case Level::pit:
+					cnt++;
+					addActor(new Pit(this, x, y));
 					break;
 				}
 			}
@@ -133,6 +152,10 @@ int StudentWorld::move()
 	list<Actor*>::iterator p = actors.begin();
 	while (p != actors.end())
 	{
+		// Delete actors from the vector if they are dead
+		// or ask them to do something if they are alive
+		// This is slightly different from the suggestion in the spec.
+		// I didn't feel that two loops were necessary.
 		if ((*p)->isDead())
 		{
 			delete *p;
@@ -146,19 +169,7 @@ int StudentWorld::move()
 		}
 	}
 
-	// Set Status Text
-	ostringstream oss;
-	oss.fill('0');
-	oss << "Score: "<< setw(5) << getScore();
-	oss << "  Level: " << getLevel();
-	oss << "  Lives : " << getLives();
-	oss << "  Vaccines : " << m_pen->getNumVaccines();
-	oss << "  Flames : " << m_pen->getNumFlameCharges();
-	oss << "  Mines : " << m_pen->getNumLandmines();
-	oss << "  Infected : " << m_pen->getInfectionDuration();
-	//cerr << oss.str() << endl;
-	setGameStatText(oss.str());
-
+	// Check if Penelope died or won the game
 	if (m_pen->isDead())
 	{
 		decLives();
@@ -166,8 +177,20 @@ int StudentWorld::move()
 	}
 	else if (getLevelFinished())
 		return GWSTATUS_FINISHED_LEVEL;
-	else
-		return GWSTATUS_CONTINUE_GAME;
+
+	// Set Status Text
+	ostringstream oss;
+	oss.fill('0');
+	oss << "Score: " << setw(5) << getScore();
+	oss << "  Level: " << getLevel();
+	oss << "  Lives : " << getLives();
+	oss << "  Vaccines : " << m_pen->getNumVaccines();
+	oss << "  Flames : " << m_pen->getNumFlameCharges();
+	oss << "  Mines : " << m_pen->getNumLandmines();
+	oss << "  Infected : " << m_pen->getInfectionDuration();
+	setGameStatText(oss.str());
+
+	return GWSTATUS_CONTINUE_GAME;
 }
 
 void StudentWorld::cleanUp()

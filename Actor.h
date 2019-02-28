@@ -9,9 +9,6 @@ class Penelope;
 
 class StudentWorld;
 
-// constants required for these classes
-// ...
-
 class Actor : public GraphObject
 {
 public:
@@ -89,7 +86,6 @@ class Exit : public ActivatingObject
 public:
 	Exit(StudentWorld* w, double x, double y);
 	virtual void doSomething();
-
 	virtual void activateIfAppropriate(Actor* a);
 	virtual bool blocksFlame() const;
 };
@@ -100,7 +96,6 @@ public:
 	Goodie(StudentWorld* w, int imageID, double x, double y);
 	virtual void activateIfAppropriate(Actor* a);
 	virtual void dieByFallOrBurnIfAppropriate();
-
 	// Have p pick up this goodie.
 	virtual void pickUp(Penelope* p) = 0;
 };
@@ -191,9 +186,10 @@ public:
 
 	// How many ticks since this human was infected by vomit?
 	int getInfectionDuration() const;
-	void incInfectionDuration(); //TODO: NOT IN INTERFACE
+	void incInfectionDuration();
 
 private:
+	virtual void beVomitedOnIfAppropriateHelper();
 	bool m_infectionStatus;
 	int m_infectionCount;
 };
@@ -245,15 +241,14 @@ public:
 	virtual void doSomething();
 	virtual void useExitIfAppropriate();
 	virtual void dieByFallOrBurnIfAppropriate();
-
+	// Helper functions to decide citizen's movement
 	void decideMovementPlan();
 	bool move();
 
 private:
-
+	virtual void beVomitedOnIfAppropriateHelper();
 	int  getCurrentTick();
 	void nextTick();
-
 	int m_currentTick;
 };
 
@@ -262,28 +257,24 @@ class Zombie : public Agent
 {
 public:
 	Zombie(StudentWorld* w, double x, double y);
-
 	bool startDoSomething();
 	virtual void decideMovementPlan() = 0;
-	void move();
 
+	// Is this object a threat to citizens?
+	virtual bool threatensCitizens() const;
+	// Does this object trigger citizens to follow it or flee it?
+	virtual bool triggersCitizens() const;
+	// Helper function to vomit
+	bool vomit();
+	// Helper functions for Zombie's movement
+	void move();
 	int  getMovementPlanDistance();
 	void setMovementPlanDistance(int x);
 	void decMovementPlanDistance();
 
-	// Is this object a threat to citizens?
-	virtual bool threatensCitizens() const;
-
-	// Does this object trigger citizens to follow it or flee it?
-	virtual bool triggersCitizens() const;
-
-	bool vomit();
-
 private:
-
 	int  getCurrentTick();
 	void nextTick();
-
 	int m_movementPlanDistance;
 	int m_currentTick;
 };
