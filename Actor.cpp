@@ -659,7 +659,6 @@ void Citizen::nextTick()
 void Citizen::decideMovementPlan()
 {
 	// TODO: CITIZEN SHOULD REMAIN STILL UNLESS CLOSE TO PENELOPE OR ZOMBIE
-	// I think that the distance threshold is set too high
 
 	// Create directions array
 	int DIRS[] = { up, down, left, right };
@@ -669,38 +668,71 @@ void Citizen::decideMovementPlan()
 	double other_y = getY();
 	double distance = 0;
 	bool isThreat = false;
+
+	// Find the closest citizen trigger
 	world()->locateNearestCitizenTrigger(this, other_x, other_y, distance, isThreat);
+
+	// If the closest trigger is Penelope, attempt to move towards her
 	if (!isThreat && distance <= (80 * 80))
 	{
 		// The direction is chosen to be one that would cause the
 		// citizen to get closer to Penelope
 		// If the citizen is on the same row or column as Penelope,
 		// choose the(only) direction that gets the citizen closer
+
+		// Set temp values
+		double dest_x = getX();
+		double dest_y = getY();
+		int direction = getDirection();
+
+		// If they are on the same column
 		if (other_x == getX())
 		{
 			if (other_y > getY())
 			{
-				setDirection(up);
+				direction = up;
+				dest_x = getX();
+				dest_y = getY() + 2;
 			}
 			else
-				setDirection(down);
-			if (move())
+			{
+				direction = down;
+				dest_x = getX();
+				dest_y = getY() - 2;
+			}
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			{
+				setDirection(direction);
+				moveTo(dest_x, dest_y);
 				return;
+			}
 		}
+		// If they are on the same row
 		else if (other_y == getY())
 		{
 			if (other_x > getX())
 			{
-				setDirection(right);
+				direction = right;
+				dest_x = getX() + 2;
+				dest_y = getY();
 			}
 			else
-				setDirection(left);
-			if (move())
+			{
+				direction = left;
+				dest_x = getX() - 2;
+				dest_y = getY();
+			}
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			{
+				setDirection(direction);
+				moveTo(dest_x, dest_y);
 				return;
+			}
 		}
+		// Otherwise, choose randomly between the two directions
+		// (one horizontal and one vertical) that get the citizen closer
+		// to Penelope
 		else
-			// Otherwise, choose randomly between the two directions
-			// (one horizontal and one vertical) that get the citizen closer
 		{
 			// Set possible directions
 			int possibleDirs[2];
@@ -720,18 +752,60 @@ void Citizen::decideMovementPlan()
 				else
 					possibleDirs[1] = down;
 			}
-			// Attempt to move in that direction
-			int direction = possibleDirs[randInt(0, 1)];
-			setDirection(direction);
-			if (move())
-				return;
-			else
-			// Moving in that direction didn't work
-			// Attempt to move in that direction
+
+			// set the temporary direction to one of those directions
+			int randomInteger = randInt(0, 1);
+			direction = possibleDirs[randomInteger];
+
+			switch (direction)
 			{
-				setDirection(1-direction);
-				if (move())
-					return;
+			case left:
+				dest_x -= 2;
+				break;
+			case right:
+				dest_x += 2;
+				break;
+			case up:
+				dest_y += 2;
+				break;
+			case down:
+				dest_y -= 2;
+				break;
+			}
+
+			if (!(world()->isAgentMovementBlockedAt(this, dest_x, dest_y)))
+			{
+				setDirection(direction);
+				moveTo(dest_x, dest_y);
+				return;
+			}
+			
+			// Moving in that direction didn't work
+			// Attempt to move in the other direction
+			// reset temp values
+			dest_x = getX();
+			dest_y = getY();
+			direction = possibleDirs[1-randomInteger];
+			switch (direction)
+			{
+			case left:
+				dest_x -= 2;
+				break;
+			case right:
+				dest_x += 2;
+				break;
+			case up:
+				dest_y += 2;
+				break;
+			case down:
+				dest_y -= 2;
+				break;
+			}
+			if (!world()->isAgentMovementBlockedAt(this, dest_x, dest_y))
+			{
+				setDirection(direction);
+				moveTo(dest_x, dest_y);
+				return;
 			}
 		}
 	}
@@ -743,17 +817,20 @@ void Citizen::decideMovementPlan()
 		// choose the (only) direction that gets the citizen further
 
 		// We know that the distance has to be <= 80
-		// so we can set the starting value of minDistance to 81
-		double minDistance = 81;
-		double dest_x = getX();
-		double dest_y = getY();
+		// so we can set the starting value of minDistance to slightly above 80 pixels
+		double minDistance = (80 * 81);
 		double other_x;
 		double other_y;
-		double otherDistance = 81;
+		double otherDistance = (80 * 81);
 		int direction = DIRS[randInt(0,3)];
+		bool foundNearestZombie = false;
+		bool canMove = false;
 		// For each of the four directions
+		// locate the nearest Zombie
 		for (int i = 0; i < 4; i++)
 		{
+			double dest_x = getX();
+			double dest_y = getY();
 			switch (DIRS[i])
 			{
 			case left:
@@ -778,15 +855,57 @@ void Citizen::decideMovementPlan()
 				{
 					minDistance = otherDistance;
 					direction = DIRS[i];
+					foundNearestZombie = true;
 				}
 			}
 		}
-		// Set the citizen’s direction to the direction that will take it furthest
-		// away from the nearest zombie.
-		setDirection(direction);
-		// Move 2 pixels in that direction using the GraphObject class's
-		// moveTo() method.
-		move();
+		if (foundNearestZombie)
+		{
+			// For each of the four directions
+			// check which direction will take the citizen furthest away
+			double maxDistance = 0;
+			for (int i = 0; i < 4; i++)
+			{
+				double dest_x = getX();
+				double dest_y = getY();
+				switch (DIRS[i])
+				{
+				case left:
+					dest_x -= 2;
+					break;
+				case right:
+					dest_x += 2;
+					break;
+				case up:
+					dest_y += 2;
+					break;
+				case down:
+					dest_y -= 2;
+					break;
+				}
+				// Determine if the citizen is blocked from moving 2 pixels in that direction
+				// Determine the distance to the nearest zombie
+				if (!(world()->isAgentMovementBlockedAt(this, dest_x, dest_y)) &&
+					world()->locateNearestCitizenThreat(dest_x, dest_y, other_x, other_y, otherDistance))
+				{
+					if (otherDistance > maxDistance)
+					{
+						maxDistance = otherDistance;
+						direction = DIRS[i];
+						canMove = true;
+					}
+				}
+			}
+			if (canMove)
+			{
+				// Set the citizen’s direction to the direction that will take it furthest
+				// away from the nearest zombie.
+				setDirection(direction);
+				// Move 2 pixels in that direction using the GraphObject class's
+				// moveTo() method.
+				moveTo(dest_x, dest_y);
+			}
+		}
 	}
 	// If the distance to the selected nearest person is more than 80 pixels
 	// away, the citizen does nothing

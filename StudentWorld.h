@@ -32,6 +32,10 @@ public:
 	// Is creation of a flame blocked at the indicated location?
 	bool isFlameBlockedAt(Actor* curActor, double x, double y);
 
+	// Is creation of a vaccine blocked at the indicated location
+	// when a Dumb Zombie attempts to fling it?
+	bool isVaccineBlockedAt(Actor* curActor, double x, double y);
+
 	// For each actor overlapping a, activate a if appropriate.
 	void activateOnAppropriateActors(Actor* a);
 
