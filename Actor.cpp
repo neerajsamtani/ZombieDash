@@ -658,7 +658,6 @@ void Citizen::nextTick()
 
 void Citizen::decideMovementPlan()
 {
-	// TODO: CITIZEN SHOULD REMAIN STILL UNLESS CLOSE TO PENELOPE OR ZOMBIE
 	// Create directions array
 	int DIRS[] = { right, left, up, down };
 
@@ -1001,9 +1000,7 @@ void Citizen::dieByFallOrBurnIfAppropriate()
 Zombie::Zombie(StudentWorld* w, double x, double y)
 	: Agent(w, IID_ZOMBIE, x, y, right),
 	m_movementPlanDistance(0), m_currentTick(0)
-{
-	// TODO: OTHER CIRCUMSTANCES
-}
+{}
 
 int Zombie::getCurrentTick()
 {
@@ -1129,8 +1126,6 @@ bool Zombie::vomit()
 ///////////////////////
 ///// DUMB ZOMBIE /////
 ///////////////////////
-
-// TODO: DUMB ZOMBIES DROP VACCINES SOMETIMES
 
 DumbZombie::DumbZombie(StudentWorld* w, double x, double y)
 	: Zombie(w, x, y)

@@ -5,13 +5,8 @@
 #include <iomanip>
 using namespace std;
 
-/*
-TODO
 
-is_____BlockedAt requires a common function
-
-Vomit is not blocked by an exit.
-*/
+// TODO: is_____BlockedAt requires a common function
 
 double euclidianDistance(Actor* A, Actor* B)
 {
@@ -49,7 +44,6 @@ StudentWorld::~StudentWorld()
 
 int StudentWorld::init()
 {
-	// TODO: Remove cerr
 	m_numCitizens = 0;
 	m_canExit = false;
 	m_levelFinished = false;
@@ -128,8 +122,6 @@ int StudentWorld::init()
 			}
 		}
 		recordLevelFinishedIfAllCitizensGone();
-		cerr << "Created " << cnt << " actors" << endl;
-		cerr << "Size of list " << actors.size() << endl;
 		return GWSTATUS_CONTINUE_GAME;
 	}
 	return GWSTATUS_PLAYER_WON;
@@ -189,20 +181,13 @@ int StudentWorld::move()
 
 void StudentWorld::cleanUp()
 {
-	// TODO: Remove cerr lines
-
-	cerr << "Ending Level " << getLevel()-1 << endl;
-	if (m_pen != nullptr) // TODO: Is this check necessary?
+	if (m_pen != nullptr)
 	{
-		cerr << "Deleting Penelope" << endl;
 		delete m_pen;
 		m_pen = nullptr;
-		// cerr << "Deleted Penelope" << endl;
 	}
 	int cnt = 0;
-	// cerr << "Set count to 0" << endl;
 	list<Actor*>::iterator p = actors.begin();
-	// cerr << "Initialized p" << endl;
 	while (p != actors.end())
 	{
 		cnt++;
@@ -211,7 +196,6 @@ void StudentWorld::cleanUp()
 		list<Actor*>::iterator q = actors.erase(p);
 		p = q;
 	}
-	cerr << "Deleted " << cnt << " Actors" << endl;
 }
 
 bool StudentWorld::isAgentMovementBlockedAt(Actor* curActor, double x, double y)

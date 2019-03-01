@@ -60,9 +60,8 @@ public:
 	virtual bool triggersCitizens() const;
 
 private:
-	bool m_isDead;
-	bool m_isInfected;
 	StudentWorld* m_sWorld;
+	bool m_isDead;
 };
 
 class Wall : public Actor
@@ -231,8 +230,6 @@ private:
 	int m_flamethrowerCharges;
 	int m_vaccines;
 };
-
-// TODO: MERGE CITIZEN MOVE AND ZOMBIE MOVE
 
 class Citizen : public Human
 {

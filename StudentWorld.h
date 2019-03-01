@@ -7,7 +7,7 @@
 #include <string>
 #include <list>
 using namespace std;
-// TODO: Build under g32
+
 class Actor;
 class Penelope;
 
