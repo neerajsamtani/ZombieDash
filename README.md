@@ -23,4 +23,4 @@ press the ‘q’ key.
 
 ___
 
-###### The graphics and sound of ZombieDash were programmed by Carey Nachenberg using FreeGLUT and irrKlang libraraies. I programmed the logic of the game.
+###### The graphics and sound of ZombieDash were programmed by Carey Nachenberg using FreeGLUT and irrKlang libraries. I programmed the logic of the game.
