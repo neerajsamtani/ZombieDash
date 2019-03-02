@@ -20,3 +20,5 @@ down is s or 2, right is d or 6. Use the space key to fire Penelope’s flamethr
 picked up fuel), the tab key to deploy a landmine (if she’s picked up landmines), and the
 enter key to use a vaccine (if she’s picked up a vaccine kit). To quit the game at any time,
 press the ‘q’ key.
+
+###### The graphics and sound of ZombieDash were programmed by Carey Nachenberg using FreeGLUT and irrKlang libraraies. I programmed the logic of the game.
