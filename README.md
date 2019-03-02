@@ -21,4 +21,6 @@ picked up fuel), the tab key to deploy a landmine (if she’s picked up landmine
 enter key to use a vaccine (if she’s picked up a vaccine kit). To quit the game at any time,
 press the ‘q’ key.
 
+___
+
 ###### The graphics and sound of ZombieDash were programmed by Carey Nachenberg using FreeGLUT and irrKlang libraraies. I programmed the logic of the game.
