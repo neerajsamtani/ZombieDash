@@ -1,9 +1,6 @@
 # ZombieDash
 ### A game about an amateur zombie hunter.
 
-![](ZombieDashScreenshot.png)
-###### Gameplay in Zombie Dash
-
 ## Synopsis
 In Zombie Dash, you play the role of Penelope Dolittle, an amateur zombie hunter and
 professional StarCraft player. Your job is to trek through an abandoned building, rescuing
@@ -23,6 +20,9 @@ down is s or 2, right is d or 6. Use the space key to fire Penelope’s flamethr
 picked up fuel), the tab key to deploy a landmine (if she’s picked up landmines), and the
 enter key to use a vaccine (if she’s picked up a vaccine kit). To quit the game at any time,
 press the ‘q’ key.
+
+![](ZombieDashScreenshot.png)
+###### Gameplay in Zombie Dash
 
 ___
 
