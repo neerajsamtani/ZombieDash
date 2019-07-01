@@ -1,6 +1,9 @@
 # ZombieDash
 ### A game about an amateur zombie hunter.
 
+![](ZombieDashScreenshot.png)
+###### Gameplay in Zombie Dash
+
 ## Synopsis
 In Zombie Dash, you play the role of Penelope Dolittle, an amateur zombie hunter and
 professional StarCraft player. Your job is to trek through an abandoned building, rescuing
